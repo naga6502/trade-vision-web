@@ -11,20 +11,16 @@ export interface CorporateActionsArgs {
 
 interface NseCorpActionRow {
   symbol?: string;
-  company?: string;
+  comp?: string;
   series?: string;
   faceVal?: number | string;
   subject?: string;
   exDate?: string;
   recDate?: string;
-  bcStDt?: string;
-  bcEndDt?: string;
-  payDt?: string;
+  bcStartDate?: string;
+  bcEndDate?: string;
+  payDate?: string;
   remarks?: string;
-}
-
-interface NseCorpActionsResponse {
-  data?: NseCorpActionRow[];
 }
 
 function toNseDateFormat(dateStr: string): string {
@@ -36,15 +32,15 @@ function toNseDateFormat(dateStr: string): string {
 function parseRow(row: NseCorpActionRow): CorporateAction {
   return {
     symbol: (row.symbol ?? "").trim().toUpperCase(),
-    company: (row.company ?? "").trim(),
+    company: (row.comp ?? "").trim(),
     series: (row.series ?? "EQ").trim(),
     faceValue: Number(row.faceVal ?? 0),
     purpose: (row.subject ?? "").trim(),
     exDate: (row.exDate ?? "").trim(),
     recordDate: (row.recDate ?? "").trim(),
-    bcStartDate: (row.bcStDt ?? "").trim(),
-    bcEndDate: (row.bcEndDt ?? "").trim(),
-    paymentDate: (row.payDt ?? "").trim(),
+    bcStartDate: (row.bcStartDate ?? "").trim(),
+    bcEndDate: (row.bcEndDate ?? "").trim(),
+    paymentDate: (row.payDate ?? "").trim(),
     remarks: (row.remarks ?? "").trim(),
   };
 }
@@ -58,9 +54,9 @@ export async function getCorporateActions(
   const from = toNseDateFormat(args.fromDate ?? threeMonthsAgo.toISOString().slice(0, 10));
   const to = toNseDateFormat(args.toDate ?? today.toISOString().slice(0, 10));
 
-  const path = `/api/corporates-corpActions?index=equities&from_date=${encodeURIComponent(from)}&to_date=${encodeURIComponent(to)}`;
-  const resp = await fetchNSE<NseCorpActionsResponse>(path);
-  const actions = (resp.data ?? []).map(parseRow);
+  const path = `/api/corporates-corporateActions?index=equities&from_date=${encodeURIComponent(from)}&to_date=${encodeURIComponent(to)}`;
+  const resp = await fetchNSE<NseCorpActionRow[]>(path);
+  const actions = (resp ?? []).map(parseRow);
 
   const symbolFilter = args.symbol?.trim().toUpperCase();
   if (symbolFilter) return actions.filter((a) => a.symbol === symbolFilter);

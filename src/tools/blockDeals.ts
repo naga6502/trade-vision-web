@@ -7,42 +7,43 @@ export interface BlockDealsArgs {
 }
 
 interface NseBlockDealRow {
-  NSESymbol?: string;
-  SCRIP_NAME?: string;
-  CLIENT_NAME?: string;
-  BUY_SELL?: string;
-  NO_OF_SHARES?: number | string;
-  TRADE_PRICE?: number | string;
+  date?: string;
+  symbol?: string;
+  name?: string;
+  clientName?: string;
+  buySell?: string;
+  qty?: string | number;
+  watp?: string | number;
+  remarks?: string;
 }
 
 interface NseBlockDealsResponse {
-  date?: string;
-  data?: NseBlockDealRow[];
+  as_on_date?: string;
+  BLOCK_DEALS_DATA?: NseBlockDealRow[];
 }
 
-function parseRow(row: NseBlockDealRow, date: string): BlockDeal | null {
-  const symbol = (row.NSESymbol ?? "").trim().toUpperCase();
+function parseRow(row: NseBlockDealRow): BlockDeal | null {
+  const symbol = (row.symbol ?? "").trim().toUpperCase();
   if (!symbol) return null;
-  const rawType = (row.BUY_SELL ?? "").trim().toUpperCase();
+  const rawType = (row.buySell ?? "").trim().toUpperCase();
   const dealType = rawType === "S" || rawType === "SELL" ? "SELL" : "BUY";
   return {
-    date,
+    date: (row.date ?? "").trim(),
     symbol,
-    name: (row.SCRIP_NAME ?? "").trim(),
-    clientName: (row.CLIENT_NAME ?? "").trim(),
+    name: (row.name ?? "").trim(),
+    clientName: (row.clientName ?? "").trim(),
     dealType,
-    quantity: Number(row.NO_OF_SHARES ?? 0),
-    price: Number(row.TRADE_PRICE ?? 0),
+    quantity: Number(row.qty ?? 0),
+    price: Number(row.watp ?? 0),
   };
 }
 
 export async function getBlockDeals(args: BlockDealsArgs = {}): Promise<BlockDeal[]> {
-  const resp = await fetchNSE<NseBlockDealsResponse>("/api/block-deals");
-  const date = resp.date ?? "";
-  const rows = resp.data ?? [];
+  const resp = await fetchNSE<NseBlockDealsResponse>("/api/snapshot-capital-market-largedeal");
+  const rows = resp.BLOCK_DEALS_DATA ?? [];
 
   const deals = rows.flatMap((r) => {
-    const d = parseRow(r, date);
+    const d = parseRow(r);
     return d ? [d] : [];
   });
 

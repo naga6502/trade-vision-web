@@ -17,7 +17,7 @@ interface NseMarketStatusResponse {
 }
 
 export async function getMarketStatus(): Promise<MarketStatusItem[]> {
-  const resp = await fetchNSE<NseMarketStatusResponse>("/api/market-status", {
+  const resp = await fetchNSE<NseMarketStatusResponse>("/api/marketStatus", {
     ttlMs: 30_000,
   });
   return (resp.marketState ?? []).map((item) => ({

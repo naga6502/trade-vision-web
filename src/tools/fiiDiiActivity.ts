@@ -7,35 +7,55 @@ export interface FiiDiiActivityArgs {
 }
 
 interface NseFiiDiiRow {
+  category?: string;
   date?: string;
-  fiiBuyValue?: number | string;
-  fiiSellValue?: number | string;
-  fiiNetValue?: number | string;
-  diiBuyValue?: number | string;
-  diiSellValue?: number | string;
-  diiNetValue?: number | string;
-}
-
-interface NseFiiDiiResponse {
-  data?: NseFiiDiiRow[];
-}
-
-function parseRow(row: NseFiiDiiRow): FiiDiiActivity {
-  return {
-    date: (row.date ?? "").trim(),
-    fiiBuyValue: Number(row.fiiBuyValue ?? 0),
-    fiiSellValue: Number(row.fiiSellValue ?? 0),
-    fiiNetValue: Number(row.fiiNetValue ?? 0),
-    diiBuyValue: Number(row.diiBuyValue ?? 0),
-    diiSellValue: Number(row.diiSellValue ?? 0),
-    diiNetValue: Number(row.diiNetValue ?? 0),
-  };
+  buyValue?: string | number;
+  sellValue?: string | number;
+  netValue?: string | number;
 }
 
 export async function getFiiDiiActivity(args: FiiDiiActivityArgs = {}): Promise<FiiDiiActivity[]> {
   const limit = Math.max(1, args.limit ?? 10);
-  const resp = await fetchNSE<NseFiiDiiResponse>("/api/fiidiiTradeReact");
-  const rows = (resp.data ?? []).map(parseRow);
-  // NSE returns newest first; keep that order and slice
-  return rows.slice(0, limit);
+  const resp = await fetchNSE<NseFiiDiiRow[]>("/api/fiidiiTradeReact");
+  
+  const rows = resp ?? [];
+  
+  // Group by date
+  const grouped = new Map<string, { fii?: NseFiiDiiRow; dii?: NseFiiDiiRow }>();
+  
+  for (const row of rows) {
+    const date = (row.date ?? "").trim();
+    if (!date) continue;
+    
+    if (!grouped.has(date)) {
+      grouped.set(date, {});
+    }
+    
+    const entry = grouped.get(date)!;
+    const category = (row.category ?? "").trim().toUpperCase();
+    
+    if (category === "FII/FPI" || category === "FII") {
+      entry.fii = row;
+    } else if (category === "DII") {
+      entry.dii = row;
+    }
+  }
+  
+  // Combine
+  const combined: FiiDiiActivity[] = [];
+  
+  for (const [date, data] of grouped.entries()) {
+    combined.push({
+      date,
+      fiiBuyValue: Number(data.fii?.buyValue ?? 0),
+      fiiSellValue: Number(data.fii?.sellValue ?? 0),
+      fiiNetValue: Number(data.fii?.netValue ?? 0),
+      diiBuyValue: Number(data.dii?.buyValue ?? 0),
+      diiSellValue: Number(data.dii?.sellValue ?? 0),
+      diiNetValue: Number(data.dii?.netValue ?? 0),
+    });
+  }
+  
+  // The API seems to return newest first. Map insertion preserves order.
+  return combined.slice(0, limit);
 }

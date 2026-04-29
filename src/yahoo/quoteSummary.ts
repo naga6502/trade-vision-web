@@ -39,8 +39,15 @@ function findQuoteSummaryScript(html: string, ticker: string): string | null {
 export async function getQuote(ticker: string): Promise<Quote> {
   const url = `${QUOTE_PAGE_BASE}/${encodeURIComponent(ticker)}/`;
   const html = await fetchYahoo(url, {
-    accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    headers: { "Accept-Language": "en-US,en;q=0.9" },
+    accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+    headers: {
+      "Accept-Language": "en-US,en;q=0.9",
+      "Upgrade-Insecure-Requests": "1",
+      "Sec-Fetch-Dest": "document",
+      "Sec-Fetch-Mode": "navigate",
+      "Sec-Fetch-Site": "none",
+      "Sec-Fetch-User": "?1"
+    },
   });
   if (html == null) {
     throw new YahooNotFoundError(`ticker not found: ${ticker}`);

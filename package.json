@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
+    "yahoo-finance2": "^3.14.0",
     "zod": "^3.22.0"
   },
   "devDependencies": {
@@ -24,7 +25,15 @@
   "engines": {
     "node": ">=20"
   },
-  "keywords": ["mcp", "nse", "india", "stock", "market", "insider-trading", "bulk-deals"],
+  "keywords": [
+    "mcp",
+    "nse",
+    "india",
+    "stock",
+    "market",
+    "insider-trading",
+    "bulk-deals"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/manitgupta/nse-mcp"

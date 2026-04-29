@@ -1,5 +1,8 @@
 import type { Quote } from "../types.js";
-import { getQuote } from "../yahoo/quoteSummary.js";
+import YahooFinance from "yahoo-finance2";
+
+// Instantiate YahooFinance as required by newer versions
+const yahooFinance = new YahooFinance();
 
 export interface QuoteArgs {
   /**
@@ -27,5 +30,33 @@ export async function getStockQuote(args: QuoteArgs): Promise<Quote> {
     throw new Error(`invalid symbol: ${JSON.stringify(raw)}`);
   }
 
-  return getQuote(ticker);
+  try {
+    const result = await yahooFinance.quote(ticker);
+
+    return {
+      ticker: result.symbol,
+      exchange: result.exchange ?? null,
+      currency: result.currency ?? "INR",
+      timestamp: result.regularMarketTime
+        ? new Date(result.regularMarketTime).toISOString()
+        : new Date().toISOString(),
+      price: result.regularMarketPrice ?? 0,
+      previousClose: result.regularMarketPreviousClose ?? 0,
+      fiftyTwoWeekHigh: result.fiftyTwoWeekHigh ?? 0,
+      fiftyTwoWeekLow: result.fiftyTwoWeekLow ?? 0,
+      volume: result.regularMarketVolume ?? 0,
+      averageVolume: result.averageDailyVolume3Month ?? null,
+      marketCap: result.marketCap ?? null,
+      beta: (result as any).beta ?? null,
+      trailingPE: result.trailingPE ?? null,
+      forwardPE: result.forwardPE ?? null,
+      dividendYield: result.dividendYield ?? null,
+      exDividendDate: null, // Not directly available in quote result
+      earningsDate: result.earningsTimestamp
+        ? new Date(result.earningsTimestamp).toISOString()
+        : null,
+    };
+  } catch (error) {
+    throw new Error(`Yahoo Finance failed for ${ticker}: ${(error as Error).message}`);
+  }
 }
