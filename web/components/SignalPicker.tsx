@@ -25,8 +25,11 @@ export default function SignalPicker({
     setLoading(true);
     setErr(null);
     setGroups(null);
-    fetch("/api/signals?limit=90&concurrency=6")
-      .then((r) => r.json())
+    fetch("/signals.json")
+      .then((r) => {
+        if (!r.ok) throw new Error(`signals.json not available (${r.status})`);
+        return r.json();
+      })
       .then((j) => {
         if (j.error) {
           setErr(j.error);
