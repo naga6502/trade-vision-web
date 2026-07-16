@@ -19,7 +19,7 @@
     "yahoo-finance2": "^3.14.0",
     "@modelcontextprotocol/sdk": "^1.0.0",
     "zod": "^3.22.0",
-    "trade-vision": "*"
+    "trade-vision": "file:./server"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
