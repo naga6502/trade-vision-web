@@ -14,6 +14,8 @@ export interface EquityCurvesResult {
     symbol: string;
     bars: number;
     windowDays: number;
+    /** Bars before the evaluated window, used to warm up slow indicators. */
+    warmupBars: number;
     strategies: EquityMetrics[];
     generatedAt: string;
 }

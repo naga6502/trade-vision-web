@@ -138,6 +138,26 @@ function backtest(closes, position) {
         trades.push({ ret: closes[closes.length - 1] / closes[entry] - 1 });
     const wins = trades.filter((t) => t.ret > 0).length;
     const winRate = trades.length ? wins / trades.length : 0;
+    // No *round-trip* trades. This is normal for buy & hold (always long), which
+    // has real, reportable performance. It only means "no signal" when the
+    // strategy never went long at all (position was flat the whole window).
+    const alwaysLong = position.every((p) => p === 1);
+    const neverLong = position.every((p) => p === 0);
+    if (trades.length === 0 && neverLong) {
+        return {
+            metrics: {
+                cumulativeReturnPct: NaN,
+                annualizedReturnPct: NaN,
+                sharpe: NaN,
+                sortino: NaN,
+                maxDrawdownPct: NaN,
+                winRate: NaN,
+                numTrades: 0,
+                finalEquity: NaN,
+            },
+            trades,
+        };
+    }
     return {
         metrics: {
             cumulativeReturnPct: round(cumulative * 100, 2),
@@ -155,9 +175,17 @@ function backtest(closes, position) {
 export async function getEquityCurves(args) {
     const ticker = validateSymbol(args.symbol);
     const windowDays = args.windowDays ?? 365;
-    const { bars } = await fetchDailyBars(ticker, Math.max(windowDays, 210));
-    if (bars.length < 60)
+    // Fetch a longer lookback so slow indicators (SMA 200) are fully warmed up
+    // before the trailing `windowDays` window we actually backtest.
+    const lookbackDays = Math.max(windowDays + 400, 750);
+    const { bars: raw } = await fetchDailyBars(ticker, lookbackDays);
+    if (raw.length < 60)
         throw new Error(`Not enough history for ${ticker}`);
+    // Evaluate only the trailing `windowDays` of bars, but keep the earlier bars
+    // so SMA(200)/EMA windows are seeded with real prices.
+    const keep = Math.min(windowDays, raw.length);
+    const bars = raw.slice(raw.length - keep);
+    const warmupBars = raw.length - keep;
     const closes = bars.map((b) => b.close);
     const specs = [
         { name: "buy_and_hold", description: "Hold the stock for the entire window.", pos: positionHold()(closes) },
@@ -177,6 +205,7 @@ export async function getEquityCurves(args) {
         symbol: ticker,
         bars: bars.length,
         windowDays,
+        warmupBars,
         strategies,
         generatedAt: new Date().toISOString(),
     };

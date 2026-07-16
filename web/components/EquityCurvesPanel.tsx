@@ -22,7 +22,7 @@ const UP = "#16c784";
 const DOWN = "#ea3943";
 
 function metric(v: number, kind: "pct" | "num" | "ratio"): string {
-  if (Number.isNaN(v)) return "—";
+  if (Number.isNaN(v)) return "n/a";
   if (kind === "pct") return fmtPct(v, false);
   if (kind === "ratio") return v.toFixed(2);
   return fmt(v, 2);
@@ -103,6 +103,7 @@ export default function EquityCurvesPanel({
         <i className="bi bi-graph-up-arrow" /> Equity Curves
         <span className="muted-text ms-2" style={{ fontSize: "0.7rem" }}>
           {d.windowDays}d · {d.bars} bars
+          {d.warmupBars ? ` · +${d.warmupBars} warm-up` : ""}
         </span>
       </div>
 
@@ -119,16 +120,27 @@ export default function EquityCurvesPanel({
             </tr>
           </thead>
           <tbody>
-            {d.strategies.map((s) => (
+            {d.strategies.map((s) => {
+              const noTrades = s.numTrades === 0;
+              return (
               <tr key={s.strategy}>
-                <td className="fw-semibold">{s.strategy}</td>
+                <td className="fw-semibold">
+                  {s.strategy}
+                  {noTrades && (
+                    <div className="muted-text" style={{ fontSize: "0.62rem", fontWeight: 400 }}>
+                      no trades
+                    </div>
+                  )}
+                </td>
                 {cols.map((c) => (
                   <td
                     key={c.key}
                     className="text-end mono"
                     style={{
                       color:
-                        c.kind === "pct" && c.key !== "maxDrawdownPct"
+                        noTrades || Number.isNaN(s[c.key] as number)
+                          ? undefined
+                          : c.kind === "pct" && c.key !== "maxDrawdownPct"
                           ? (s[c.key] as number) >= 0
                             ? UP
                             : DOWN
@@ -141,7 +153,8 @@ export default function EquityCurvesPanel({
                   </td>
                 ))}
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>
