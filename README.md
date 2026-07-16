@@ -1,4 +1,4 @@
-# NSE MCP
+# Trade Vision
 
 An [MCP (Model Context Protocol)](https://modelcontextprotocol.io) server that exposes live Indian stock market data from the **National Stock Exchange (NSE)** to LLM clients like Claude Desktop, Cursor, VS Code, and any other MCP-compatible host.
 
@@ -18,7 +18,25 @@ Modelled after [OpenInsider-MCP](https://github.com/btopn/OpenInsider-MCP) but b
 | Corporate events | `get_nse_announcements`, `get_corporate_actions` |
 | Short data | `get_short_selling` |
 
-All tools return typed JSON. No scoring, no recommendations — pure data layer.
+The server also includes fundamentals, technical analysis, chart-pattern detection, a stock screener, IPO intelligence, option-chain analytics, BSE data, and market-holiday/VIX tools (added beyond the original 17).
+
+### Quant & analytics (native, no external API key)
+
+These mirror the feature set of quant-finance MCP servers but are computed locally from Yahoo Finance history + NSE data — no paid API, no widget host:
+
+| Tool | What it returns |
+|---|---|
+| `get_ai_prediction` | Next-session directional bias from a transparent weighted ensemble (technical structure, momentum, patterns, FII flow, vol regime). *Heuristic, not a trained ML model.* |
+| `get_iv_radar` | ATM IV, IV rank/percentile (realised-vol proxy), risk reversal, vol regime — from the live option chain. |
+| `get_option_pressure` | Max pain, gamma wall (OI-weighted approximation), expected move, squeeze targets, call/put pressure zones. |
+| `get_monte_carlo` | GBM Monte Carlo (10k paths / 30d): mean/median, 68% & 90% ranges, prob above spot, prob -10%, distribution. |
+| `get_equity_curves` | Backtest of buy&hold, SMA 50/200, RSI mean-reversion, MACD cross — Sharpe, Sortino, max DD, win rate. |
+| `get_pretrade_risk_scan` | Liquidity, ATR vol, suggested stop, position sizing, gap/earnings risk, PROCEED/REDUCE/AVOID call. |
+| `generate_stock_images` | Three native SVG charts (candlestick, IV-by-strike, options-flow heatmap) written to `charts/`. |
+| `generate_stock_research_report` | One markdown research note synthesising every signal source. |
+| `get_analyze_stock` | Aggregate STRONG BUY → STRONG SELL verdict with confidence + bullish/bearish factors. |
+
+All tools return typed JSON.
 
 ---
 
@@ -39,8 +57,8 @@ All tools return typed JSON. No scoring, no recommendations — pure data layer.
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/manitgupta/nse-mcp.git
-cd nse-mcp
+git clone https://github.com/manitgupta/trade-vision.git
+cd trade-vision
 ```
 
 ### 2. Install dependencies
@@ -102,7 +120,7 @@ No manual login or API key is needed.
 
 ## Adding to an MCP client
 
-In all configs below, replace `/absolute/path/to/nse-mcp` with the actual path where you cloned the repo.
+In all configs below, replace `/absolute/path/to/trade-vision` with the actual path where you cloned the repo.
 
 ### Claude Desktop
 
@@ -111,9 +129,9 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) o
 ```json
 {
   "mcpServers": {
-    "nse-mcp": {
+    "trade-vision": {
       "command": "node",
-      "args": ["/absolute/path/to/nse-mcp/dist/index.js"]
+      "args": ["/absolute/path/to/trade-vision/dist/index.js"]
     }
   }
 }
@@ -124,9 +142,9 @@ With an env override:
 ```json
 {
   "mcpServers": {
-    "nse-mcp": {
+    "trade-vision": {
       "command": "node",
-      "args": ["/absolute/path/to/nse-mcp/dist/index.js"],
+      "args": ["/absolute/path/to/trade-vision/dist/index.js"],
       "env": {
         "NSE_MCP_UA": "Mozilla/5.0 ..."
       }
@@ -144,10 +162,10 @@ Add to `.vscode/mcp.json` in your workspace, or to your user settings:
 ```json
 {
   "servers": {
-    "nse-mcp": {
+    "trade-vision": {
       "type": "stdio",
       "command": "node",
-      "args": ["/absolute/path/to/nse-mcp/dist/index.js"]
+      "args": ["/absolute/path/to/trade-vision/dist/index.js"]
     }
   }
 }
@@ -160,9 +178,9 @@ Edit `~/.cursor/mcp.json`:
 ```json
 {
   "mcpServers": {
-    "nse-mcp": {
+    "trade-vision": {
       "command": "node",
-      "args": ["/absolute/path/to/nse-mcp/dist/index.js"]
+      "args": ["/absolute/path/to/trade-vision/dist/index.js"]
     }
   }
 }
@@ -172,7 +190,7 @@ Edit `~/.cursor/mcp.json`:
 
 ```
 command: node
-args:    ["/absolute/path/to/nse-mcp/dist/index.js"]
+args:    ["/absolute/path/to/trade-vision/dist/index.js"]
 ```
 
 ---
@@ -417,6 +435,134 @@ src/
 | Live stock quotes | Yahoo Finance (`.NS` suffix for NSE, `.BO` for BSE) |
 
 All data is fetched in real time. NSE endpoints are cached for 5 minutes; live quotes and market status for 60 seconds.
+
+---
+
+## Web Dashboard
+
+A Next.js dashboard (`web/`) visualizes the same data the MCP server exposes. It
+imports the compiled tool functions from `dist/` and serves them as REST
+endpoints, then renders charts, tables, and cards with Bootstrap + Recharts.
+
+### Run it
+
+```bash
+npm run web:install   # install web deps (one time)
+npm run web:dev       # builds dist/ then starts Next.js on http://localhost:3000
+```
+
+Open http://localhost:3000. Use `npm run web:build` + `npm run web:start` for a
+production build.
+
+### REST endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/market-status` | NSE market sessions (open/closed) |
+| GET | `/api/top-gainers?limit=10` | Top gaining stocks |
+| GET | `/api/top-losers?limit=10` | Top losing stocks |
+| GET | `/api/fii-dii?limit=10` | FII/DII net flows (₹ Cr) |
+| GET | `/api/bulk-deals?symbol=&dealType=ALL` | Today's bulk deals |
+| GET | `/api/quote?symbol=RELIANCE` | Live quote for a symbol |
+| GET | `/api/news?symbol=&category=stocks&limit=20` | Latest news — stock + market (TradingView MCP `financial_news`) |
+
+The endpoints are also handy for scripting via `curl`.
+
+### News tab
+
+Latest news is fetched **directly** by the Next.js backend (`web/lib/news.ts` →
+`/api/news`) — no external MCP server or API key required. It aggregates public
+market RSS feeds (Moneycontrol, LiveMint, Economic Times, CNBC TV18) server-side
+and optionally filters by symbol.
+
+- **News** tab on a stock (`/stock/<SYMBOL>/news`) has two views:
+  - **Stock News** — headlines mentioning the current symbol.
+  - **Market News** — all-market headlines.
+- **Market News** in the sidebar (`/news`) is the standalone, symbol-free view. It is filtered to stock / equity-market related headlines — politics, sports, entertainment and other non-market news are excluded.
+
+Feeds are cached for 5 minutes. To add or change sources, edit `MARKET_FEEDS` in
+`web/lib/news.ts`.
+
+---
+
+## Deployment
+
+The web app and the MCP server can be deployed **together as a single process**.
+The Next.js app serves the dashboard *and* a standards-compliant, networked MCP
+endpoint at `/api/mcp` (stateless Streamable HTTP). The same 21 tools the stdio
+server exposes are available over HTTP — no second process or reverse proxy.
+
+### Prerequisites
+
+- Node.js **≥ 20**
+- The root build must run **before** the web build, because the web app imports
+  the compiled tool functions from `dist/`. The `web:build` script already does
+  this in the right order.
+
+### 1. Run locally (development)
+
+```bash
+npm install            # root deps (one time)
+npm run web:install    # web deps (one time)
+npm run web:dev        # builds dist/ then starts Next.js on http://localhost:3000
+```
+
+Open http://localhost:3000 for the dashboard, or hit the MCP endpoint directly
+(see below).
+
+### 2. Run locally (production build)
+
+```bash
+npm run build          # tsc -> dist/
+npm run web:build      # next build (needs dist/ above)
+npm run web:start      # next start on http://localhost:3000 (honors $PORT)
+```
+
+### 3. The embedded MCP endpoint (`/api/mcp`)
+
+Stateless Streamable HTTP. Test it with `curl`:
+
+```bash
+# List tools
+curl -s -X POST http://localhost:3000/api/mcp \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
+
+# Call a tool
+curl -s -X POST http://localhost:3000/api/mcp \
+  -H 'Content-Type: application/json' \
+  -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"get_market_status","arguments":{}}}'
+```
+
+The dashboard's **Remote MCP** page (`/remote`) uses this same endpoint via
+`web/lib/mcpClient.ts` (defaults to same-origin `/api/mcp`).
+
+### 4. Run with Docker
+
+A single-process image builds `dist/` then the Next.js app and runs `next start`:
+
+```bash
+docker build -t trade-vision .
+docker run -p 3000:3000 trade-vision
+```
+
+Then visit http://localhost:3000 and/or call `/api/mcp` as above.
+
+### Environment variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `PORT` | `3000` | Port the Next.js server listens on. |
+| `NSE_MCP_UA` | Chrome 120 UA | Override the User-Agent sent to NSE/Yahoo. Set if NSE throttles the server's IP. |
+| `MCP_HTTP_URL` | `/api/mcp` | Point the Remote-MCP client at an external MCP server instead of the self-hosted endpoint. |
+| `MCP_HTTP_TOKEN` | *(unset)* | Optional `Authorization: Bearer` token sent by the Remote-MCP client. |
+
+> **Note on cloud hosting:** NSE India may throttle or block datacenter IPs.
+> The in-memory session cache (7-min TTL) still applies per container. If you
+> get blocked, set `NSE_MCP_UA` or route egress through a proxy. `/api/mcp` is
+> unauthenticated by default — add a Bearer-token check in
+> `web/app/api/mcp/route.ts` before exposing it publicly.
 
 ---
 

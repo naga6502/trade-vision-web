@@ -1,0 +1,1 @@
+{"version":3,"file":"latestBulkDeals.js","sourceRoot":"","sources":["../../src/tools/latestBulkDeals.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,YAAY,EAAE,MAAM,gBAAgB,CAAC;AAS9C,MAAM,CAAC,KAAK,UAAU,kBAAkB,CAAC,OAA4B,EAAE;IACrE,MAAM,KAAK,GAAG,MAAM,YAAY,CAAC,EAAE,QAAQ,EAAE,IAAI,CAAC,QAAQ,EAAE,CAAC,CAAC;IAC9D,2EAA2E;IAC3E,yEAAyE;IACzE,OAAO,KAAK,CAAC;AACf,CAAC"}

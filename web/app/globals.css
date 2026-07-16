@@ -1,0 +1,1482 @@
+:root {
+  --gain: #16c784;
+  --loss: #f6465d;
+  --accent: #2dd4bf;
+  --accent-2: #4f8cff;
+  --bg: #0a0e17;
+  --surface: #121826;
+  --surface-2: #1a2233;
+  --surface-3: #222c40;
+  --ink: #e8ecf4;
+  --muted: #8a93a6;
+  --border: #232c3d;
+  --border-soft: #1b2230;
+  --card-radius: 14px;
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  --sidebar-w: 232px;
+
+  /* Bootstrap 5.3 derives most component text from these root vars
+     (default #212529 near-black). Pointing them at the theme
+     tokens flips tables / lists / badges to light ink on the
+     dark surfaces in one place instead of per-component hacks. */
+  --bs-body-color: var(--ink);
+  --bs-body-bg: var(--bg);
+  --bs-emphasis-color: var(--ink);
+  --bs-secondary-color: var(--muted);
+  --bs-tertiary-color: var(--muted);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  margin: 0;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--accent-2);
+}
+
+.gain-text {
+  color: var(--gain);
+}
+.loss-text {
+  color: var(--loss);
+}
+.muted-text {
+  color: var(--muted);
+}
+
+/* ===================== Terminal shell ===================== */
+.terminal-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: var(--sidebar-w);
+  min-width: var(--sidebar-w);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  position: fixed;
+  inset: 0 auto 0 0;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 12px;
+  overflow-y: auto;
+  z-index: 1040;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  font-size: 0.95rem;
+  padding: 6px 10px 14px;
+  color: var(--ink);
+}
+.sidebar-brand .logo-dot {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: grid;
+  place-items: center;
+  color: #06121a;
+  font-size: 0.95rem;
+}
+.sidebar-brand .brand-logo {
+  display: block;
+  width: 158px;
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+.sidebar-section {
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--muted);
+  padding: 14px 12px 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 12px;
+  border-radius: 9px;
+  color: var(--muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.nav-item:hover {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+.nav-item.active {
+  background: linear-gradient(90deg, rgba(45, 212, 191, 0.16), rgba(79, 140, 255, 0.06));
+  color: var(--ink);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+.nav-item.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.nav-item.disabled:hover {
+  background: transparent;
+  color: var(--muted);
+}
+.nav-item .bi {
+  font-size: 1.05rem;
+  opacity: 0.9;
+}
+.nav-item .badge-soft {
+  margin-left: auto;
+  font-size: 0.6rem;
+  background: var(--surface-3);
+  color: var(--muted);
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.content {
+  flex: 1;
+  margin-left: var(--sidebar-w);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  height: 58px;
+  background: rgba(18, 24, 38, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 22px;
+}
+
+.topbar-search {
+  flex: 1;
+  max-width: 460px;
+  position: relative;
+}
+.topbar-search input {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--ink);
+  border-radius: 9px;
+  padding: 8px 12px 8px 34px;
+  font-size: 0.875rem;
+  outline: none;
+}
+.topbar-search input:focus {
+  border-color: var(--accent);
+}
+.topbar-search .bi-search {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+}
+.topbar-search .kbd {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.7rem;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1px 6px;
+}
+
+.topbar-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  cursor: pointer;
+}
+.topbar-icon:hover {
+  color: var(--ink);
+  border-color: var(--accent);
+}
+
+.topbar-updated {
+  font-size: 0.74rem;
+  white-space: nowrap;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  font-size: 1rem;
+  color: var(--ink);
+  white-space: nowrap;
+  padding-right: 10px;
+  margin-right: 4px;
+  border-right: 1px solid var(--border);
+}
+.topbar-brand .logo-dot {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: grid;
+  place-items: center;
+  color: #06121a;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.profile-chip {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 4px 10px 4px 4px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.profile-chip .avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: grid;
+  place-items: center;
+  color: #06121a;
+  font-weight: 700;
+  font-size: 0.78rem;
+}
+.profile-chip .who {
+  line-height: 1.1;
+}
+.profile-chip .who .name {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.profile-chip .who .role {
+  font-size: 0.66rem;
+  color: var(--muted);
+}
+
+.main {
+  padding: 22px;
+  flex: 1;
+}
+
+.page-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* ===================== Cards / panels ===================== */
+.card,
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--shadow);
+}
+.card-body {
+  padding: 16px;
+}
+
+/* ---- Bootstrap dark alignment ----
+   Bootstrap component classes (.card, .list-group-item, .form-control,
+   .text-dark) ship a near-black default text (#212529) that is
+   invisible on the dark --surface panels. Without these overrides the
+   data/text inside cards and lists disappears. Map every Bootstrap
+   surface/control to the theme tokens so the whole app reads
+   consistently on the dark terminal. */
+.card,
+.card-body {
+  color: var(--ink);
+}
+.list-group-item {
+  color: var(--ink);
+  background-color: var(--surface);
+  border-color: var(--border-soft);
+}
+.list-group-item-action:hover,
+.list-group-item-action:focus {
+  background-color: var(--surface-2);
+  color: var(--ink);
+}
+.form-control,
+.form-select,
+.input-group-text {
+  background-color: var(--surface-2);
+  border-color: var(--border);
+  color: var(--ink);
+}
+.form-control::placeholder {
+  color: var(--muted);
+}
+.form-control:focus,
+.form-select:focus {
+  background-color: var(--surface-2);
+  border-color: var(--accent);
+  color: var(--ink);
+  box-shadow: none;
+}
+.modal-content {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--ink);
+}
+.dropdown-menu {
+  background-color: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.dropdown-item {
+  color: var(--ink);
+}
+.dropdown-item:hover,
+.dropdown-item:focus {
+  background-color: var(--surface-3);
+  color: var(--ink);
+}
+
+.panel-title {
+  font-weight: 600;
+  font-size: 0.92rem;
+  letter-spacing: 0.01em;
+  margin: 0 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink);
+}
+.panel-title .bi {
+  color: var(--accent);
+}
+.panel-title .sub {
+  margin-left: auto;
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* Per-screen delete button inside the panel title */
+.screen-del {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin-left: 6px;
+  border: 1px solid var(--border, #2a2f3a);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+.screen-del:hover {
+  color: #ff6b6b;
+  border-color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.1);
+}
+
+/* Header Delete ALL / Restore controls */
+.btn-del-all,
+.btn-restore {
+  border: 1px solid var(--border, #2a2f3a);
+  border-radius: 7px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+.btn-del-all {
+  color: #ff7b7b;
+}
+.btn-del-all:hover {
+  background: rgba(255, 107, 107, 0.12);
+  border-color: #ff6b6b;
+}
+.btn-restore {
+  color: var(--muted);
+}
+.btn-restore:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--accent);
+  cursor: pointer;
+  font: inherit;
+  text-decoration: underline;
+  padding: 0;
+}
+
+/* Section heading (legacy) */
+.section-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--ink);
+  padding-left: 0.6rem;
+  border-left: 3px solid var(--accent);
+}
+
+/* ===================== Tables ===================== */
+.table {
+  color: var(--ink);
+  margin: 0;
+}
+.table > :not(caption) > * > * {
+  background: transparent;
+  border-color: var(--border-soft);
+  padding: 9px 12px;
+}
+.table thead th {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--border);
+}
+/* Sortable table headers (ScreenerTable) */
+.th-sort {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+.th-sort:hover {
+  color: var(--ink);
+}
+.th-sorted {
+  color: var(--accent);
+}
+.th-caret {
+  margin-left: 4px;
+  font-size: 0.62rem;
+  opacity: 0.7;
+}
+.th-sort:hover .th-caret {
+  opacity: 1;
+}
+.sort-chip {
+  margin-left: auto;
+  font-size: 0.64rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--accent);
+}
+/* Live pulse indicator (Sector Performance, etc.) */
+.live-dot {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #16c784;
+  text-transform: uppercase;
+}
+.live-dot .bi {
+  animation: livePulse 1.6s ease-in-out infinite;
+}
+@keyframes livePulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(1.25);
+  }
+}
+.table tbody tr:hover {
+  background: var(--surface-2);
+}
+.table-sm td,
+.table-sm th {
+  padding: 7px 10px;
+}
+.mono {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* ===================== Badges / pills ===================== */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+.pill.gain {
+  color: var(--gain);
+  background: rgba(22, 199, 132, 0.12);
+  border-color: rgba(22, 199, 132, 0.3);
+}
+.pill.loss {
+  color: var(--loss);
+  background: rgba(246, 70, 93, 0.12);
+  border-color: rgba(246, 70, 93, 0.3);
+}
+.pill.accent {
+  color: var(--accent);
+  background: rgba(45, 212, 191, 0.12);
+  border-color: rgba(45, 212, 191, 0.3);
+}
+
+.btn-terminal {
+  border-radius: 9px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--ink);
+  cursor: pointer;
+}
+.btn-terminal:hover {
+  border-color: var(--accent);
+}
+.btn-buy {
+  background: var(--gain);
+  border-color: var(--gain);
+  color: #04130c;
+}
+.btn-sell {
+  background: var(--loss);
+  border-color: var(--loss);
+  color: #1a0407;
+}
+
+/* ===================== Misc ===================== */
+.spin {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.range-track {
+  position: relative;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--surface-3);
+  margin-top: 6px;
+}
+.range-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--loss), var(--gain));
+}
+.range-marker {
+  position: absolute;
+  top: -3px;
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  border-radius: 50%;
+  background: var(--ink);
+  border: 2px solid var(--surface);
+}
+
+/* gauge bar (sentiment) */
+.gauge {
+  height: 8px;
+  border-radius: 6px;
+  background: var(--surface-3);
+  overflow: hidden;
+  display: flex;
+}
+.gauge .buy {
+  background: var(--gain);
+}
+.gauge .sell {
+  background: var(--loss);
+}
+
+/* ===================== Market scanner strip ===================== */
+.scanner-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+.scanner-col {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.scanner-col-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.scanner-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border-soft);
+  font-size: 0.82rem;
+}
+.scanner-row:last-child {
+  border-bottom: none;
+}
+.scanner-metrics {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 0.78rem;
+}
+.scanner-metrics .px {
+  color: var(--muted);
+}
+
+/* ===================== Market Scanners widget =====================
+   The outer grid is the shared .scanner-grid above (also used by the
+   model-portfolio on the Screener tab). These per-card styles were
+   previously undefined, which is why the widget rendered as raw,
+   unstyled HTML. */
+
+.scan-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 12px 4px;
+  position: relative;
+  overflow: hidden;
+}
+/* colored top accent strip per scanner type */
+.scan-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--muted);
+}
+.accent-gain::before   { background: var(--gain); }
+.accent-loss::before   { background: var(--loss); }
+.accent-accent::before { background: var(--accent); }
+.accent-info::before   { background: var(--accent-2); }
+
+.scan-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.scan-card-head .bi { font-size: 0.95rem; color: var(--muted); }
+.accent-gain   .scan-card-head .bi { color: var(--gain); }
+.accent-loss   .scan-card-head .bi { color: var(--loss); }
+.accent-accent .scan-card-head .bi { color: var(--accent); }
+.accent-info   .scan-card-head .bi { color: var(--accent-2); }
+
+.scan-count {
+  margin-left: auto;
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: var(--muted);
+  background: var(--surface-3);
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+
+.scan-list { display: flex; flex-direction: column; }
+
+.scan-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  column-gap: 8px;
+  padding: 7px 6px 8px;
+  border-radius: 8px;
+  border-bottom: 1px solid var(--border-soft);
+  transition: background 0.12s ease;
+}
+.scan-row:last-child { border-bottom: none; }
+.scan-row:hover { background: var(--surface-3); }
+
+.scan-id { min-width: 0; }
+.scan-sym {
+  font-weight: 700;
+  font-size: 0.82rem;
+  line-height: 1.2;
+  color: var(--ink);
+  font-family: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  letter-spacing: 0.01em;
+}
+.scan-name {
+  margin-top: 1px;
+  font-size: 0.68rem;
+  line-height: 1.25;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.scan-right { text-align: right; white-space: nowrap; }
+.scan-price {
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.scan-chg {
+  margin-top: 1px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+}
+.chg-gain { color: var(--gain); }
+.chg-loss { color: var(--loss); }
+.chg-info { color: var(--accent-2); }
+
+.scan-bar-track {
+  grid-column: 1 / -1;
+  height: 3px;
+  margin-top: 6px;
+  background: var(--surface-3);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.scan-bar-fill {
+  height: 100%;
+  min-width: 2px;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+/* bar-gain / bar-loss are defined for the sector section; add info */
+.bar-info { background: var(--accent-2); }
+
+/* Recharts dark overrides */
+.recharts-text {
+  fill: var(--muted);
+}
+.recharts-cartesian-grid line {
+  stroke: var(--border-soft);
+}
+.recharts-cartesian-axis-line,
+.recharts-cartesian-axis-tick-line {
+  stroke: var(--border);
+}
+
+/* scrollbars */
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--surface-3);
+  border-radius: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tradingview-widget-container {
+  background: var(--surface);
+}
+
+/* ===================== News feed ===================== */
+.news-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.news-tab {
+  padding: 7px 16px;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+.news-tab:hover {
+  color: var(--ink);
+}
+.news-tab.active {
+  color: var(--ink);
+  border-color: var(--accent);
+  background: rgba(45, 212, 191, 0.12);
+}
+.news-row {
+  display: block;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-soft);
+  transition: background 0.15s ease;
+}
+.news-row:last-child {
+  border-bottom: none;
+}
+.news-row:hover {
+  background: var(--surface-2);
+}
+.news-source {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.news-time {
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+.news-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.35;
+  margin-bottom: 4px;
+}
+.news-summary {
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.news-setup {
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.news-setup code {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1px 6px;
+  font-size: 0.78rem;
+}
+
+/* ===================== Technical analysis gauge ===================== */
+.ta-gauge {
+  position: relative;
+  height: 10px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--loss), #5a6072 50%, var(--gain));
+  margin: 18px 0 6px;
+}
+.ta-marker {
+  position: absolute;
+  top: -4px;
+  width: 3px;
+  height: 18px;
+  background: var(--ink);
+  border-radius: 2px;
+  transform: translateX(-50%);
+  box-shadow: 0 0 0 2px var(--surface);
+}
+.ta-scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.66rem;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* ===================== Technical hero / verdict ===================== */
+.verdict-badge {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: 0.4px;
+  line-height: 1;
+}
+.verdict-badge .vsub {
+  font-size: 0.62rem;
+  font-weight: 600;
+  opacity: 0.85;
+  letter-spacing: 0.6px;
+}
+.vb {
+  color: #04130c;
+  background: var(--gain);
+}
+.bull {
+  color: var(--gain);
+  background: rgba(22, 199, 132, 0.14);
+  border: 1px solid rgba(22, 199, 132, 0.45);
+}
+.neut {
+  color: #ffb454;
+  background: rgba(255, 180, 84, 0.14);
+  border: 1px solid rgba(255, 180, 84, 0.45);
+}
+.bear {
+  color: var(--loss);
+  background: rgba(246, 70, 93, 0.14);
+  border: 1px solid rgba(246, 70, 93, 0.45);
+}
+.vbr {
+  color: #1a0407;
+  background: var(--loss);
+}
+.hero-stat {
+  min-width: 84px;
+}
+.hero-stat .k {
+  font-size: 0.64rem;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+}
+.hero-stat .v {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-top: 2px;
+}
+
+/* ===================== Chart / Recharts (dark-friendly) ===================== */
+/* Recharts defaults render legend/tooltip text in black — force light ink
+   so data is visible on the dark surface. */
+.recharts-text {
+  fill: var(--muted);
+}
+.recharts-cartesian-axis-tick text {
+  fill: var(--muted);
+}
+.recharts-cartesian-grid line {
+  stroke: var(--border-soft);
+}
+.recharts-legend-item-text {
+  color: var(--ink) !important;
+}
+.recharts-default-tooltip {
+  background: var(--surface-2) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+}
+.recharts-tooltip-label,
+.recharts-tooltip-item,
+.recharts-tooltip-item-name,
+.recharts-tooltip-item-value {
+  color: var(--ink) !important;
+}
+.recharts-tooltip-cursor {
+  stroke: var(--border);
+  fill: rgba(255, 255, 255, 0.04);
+}
+
+.empty-note {
+  color: var(--muted);
+  font-size: 0.85rem;
+  padding: 18px 4px;
+  text-align: center;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 1100px) {
+  .grid-2,
+  .grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  .content {
+    margin-left: 0;
+  }
+}
+
+/* ===================== Dashboard market widgets ===================== */
+.index-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+@media (max-width: 700px) {
+  .index-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.strip-tile {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.strip-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.strip-value {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+}
+.strip-pct {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.mini-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+.mini-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.mini-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.mini-pct {
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.mini-value {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.25;
+}
+.mini-sub {
+  font-size: 0.72rem;
+}
+
+.nifty-row {
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+.nifty-row:last-child {
+  border-bottom: none;
+}
+.wt-track {
+  height: 5px;
+  background: var(--surface-2);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+.wt-fill {
+  height: 100%;
+  border-radius: 3px;
+}
+.wt-gain {
+  background: var(--gain);
+}
+.wt-loss {
+  background: var(--loss);
+}
+.wt-label {
+  font-size: 0.68rem;
+}
+
+.sector-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sector-row {
+  display: grid;
+  grid-template-columns: 130px 1fr 64px;
+  align-items: center;
+  gap: 10px;
+}
+@media (max-width: 600px) {
+  .sector-row {
+    grid-template-columns: 96px 1fr 56px;
+  }
+}
+.sector-name {
+  font-size: 0.78rem;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sector-bar-track {
+  height: 8px;
+  background: var(--surface-2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.sector-bar {
+  height: 100%;
+  border-radius: 4px;
+  min-width: 2px;
+}
+.bar-gain {
+  background: var(--gain);
+}
+.bar-loss {
+  background: var(--loss);
+}
+.sector-pct {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-align: right;
+}
+
+.breadth-bar {
+  display: flex;
+  height: 14px;
+  border-radius: 7px;
+  overflow: hidden;
+  background: var(--surface-2);
+}
+.breadth-gain {
+  background: var(--gain);
+}
+.breadth-flat {
+  background: var(--muted);
+  opacity: 0.5;
+}
+.breadth-loss {
+  background: var(--loss);
+}
+
+/* ===================== Screener tab ===================== */
+.screener-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+.screener-card .table td,
+.screener-card .table th {
+  padding: 7px 10px;
+  font-size: 0.8rem;
+}
+.screener-card .table thead th {
+  font-size: 0.64rem;
+  letter-spacing: 0.03em;
+}
+/* Fixed layout so the table never exceeds the card width (the 4
+   columns were overflowing narrow cards). Clip every cell except
+   the SCORE column, which must stay visible so its hover
+   tooltip can escape the cell. */
+.screener-card .table {
+  table-layout: fixed;
+  width: 100%;
+}
+.screener-card .table th,
+.screener-card .table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.screener-card .table th:nth-child(1) {
+  width: 44%;
+}
+.screener-card .table th:nth-child(2),
+.screener-card .table th:nth-child(3) {
+  width: 21%;
+}
+.screener-card .table th:nth-child(4) {
+  width: 14%;
+}
+/* The symbol cell stacks code + name: let it flow (no clip) so the inner
+   name line can ellipsis on its own instead of cutting the whole cell. */
+.screener-card .table td:nth-child(1) {
+  overflow: visible;
+  white-space: normal;
+}
+.screener-card .table td:last-child {
+  overflow: visible;
+  white-space: normal;
+}
+/* Numeric columns: tabular figures, slightly tighter so 4-digit prices
+   stay fully visible instead of truncating to "1....". */
+.screener-card .table td:nth-child(2),
+.screener-card .table td:nth-child(3) {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.76rem;
+}
+/* Per-screen sort control */
+.screener-sort {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 0 10px;
+  flex-wrap: wrap;
+}
+.screener-sort-lbl {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin-right: 2px;
+}
+.mini-btn {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+.mini-btn:hover {
+  color: var(--ink);
+  border-color: var(--accent);
+}
+.mini-btn.active {
+  color: #0a0d14;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.screener-card .sym {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* Stacked symbol + company name (used in the screener cards and the
+   model-portfolio picks). Scoped loosely so both contexts render it. */
+.sym-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+.sym-line {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+.sym-code {
+  font-weight: 600;
+  font-size: 0.8rem;
+  line-height: 1.15;
+  color: var(--ink);
+  white-space: nowrap;
+  font-family: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  letter-spacing: 0.01em;
+}
+.sym-name {
+  margin-top: 1px;
+  font-size: 0.64rem;
+  line-height: 1.2;
+  color: var(--muted);
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* small risk dot before each symbol */
+.risk-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 7px;
+  vertical-align: middle;
+}
+.risk-dot.low {
+  background: var(--gain);
+}
+.risk-dot.medium {
+  background: #ffb454;
+}
+.risk-dot.high {
+  background: var(--loss);
+}
+
+/* CSS-only tooltip (no JS). Lives inside a plain <table>, not
+   .table-responsive, so it is not clipped by the scroll container.
+   Anchored to the pill's right edge (not centered) so it never
+   spills past the card / grid on the rightmost column. */
+.tip {
+  position: relative;
+  display: inline-flex;
+  cursor: help;
+}
+.tip-body {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  left: auto;
+  transform: none;
+  width: max-content;
+  max-width: 260px;
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.74rem;
+  line-height: 1.5;
+  color: var(--ink);
+  text-align: left;
+  white-space: normal;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.14s ease;
+  z-index: 60;
+  pointer-events: none;
+}
+.tip:hover .tip-body {
+  opacity: 1;
+  visibility: visible;
+}
+.tip-body .tip-h {
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.tip-body .tip-k {
+  color: var(--muted);
+  margin-top: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* per-card pagination footer */
+.screener-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-soft);
+}
+.pg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.pg-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.pg-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.pg-info {
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}

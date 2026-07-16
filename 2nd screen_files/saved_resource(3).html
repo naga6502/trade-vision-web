@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<!-- saved from url=(0012)about:srcdoc -->
+<html class="dark" lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>AlphaTerminal: Technical Analysis (AAPL)</title>
+<script src="https://cdn.tailwindcss.com/?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#c2c6d6",
+                        "primary": "#adc6ff",
+                        "on-secondary-fixed-variant": "#005236",
+                        "outline": "#8c909f",
+                        "on-secondary-container": "#00311f",
+                        "on-background": "#dae2fd",
+                        "on-tertiary-container": "#5b0017",
+                        "inverse-surface": "#dae2fd",
+                        "on-primary": "#002e6a",
+                        "secondary": "#4edea3",
+                        "error": "#ffb4ab",
+                        "tertiary-container": "#ff516a",
+                        "on-secondary-fixed": "#002113",
+                        "background": "#0b1326",
+                        "surface-bright": "#31394d",
+                        "on-tertiary-fixed": "#40000d",
+                        "secondary-container": "#00a572",
+                        "on-error": "#690005",
+                        "surface-dim": "#0b1326",
+                        "surface-container-low": "#131b2e",
+                        "primary-fixed": "#d8e2ff",
+                        "surface": "#0b1326",
+                        "primary-container": "#4d8eff",
+                        "outline-variant": "#424754",
+                        "surface-container": "#171f33",
+                        "secondary-fixed-dim": "#4edea3",
+                        "inverse-on-surface": "#283044",
+                        "surface-container-high": "#222a3d",
+                        "inverse-primary": "#005ac2",
+                        "on-primary-fixed": "#001a42",
+                        "on-error-container": "#ffdad6",
+                        "error-container": "#93000a",
+                        "surface-variant": "#2d3449",
+                        "on-primary-container": "#00285d",
+                        "tertiary-fixed-dim": "#ffb2b7",
+                        "surface-container-lowest": "#060e20",
+                        "on-tertiary-fixed-variant": "#92002a",
+                        "on-primary-fixed-variant": "#004395",
+                        "on-secondary": "#003824",
+                        "primary-fixed-dim": "#adc6ff",
+                        "tertiary": "#ffb2b7",
+                        "on-tertiary": "#67001b",
+                        "surface-tint": "#adc6ff",
+                        "tertiary-fixed": "#ffdadb",
+                        "surface-container-highest": "#2d3449",
+                        "on-surface": "#dae2fd",
+                        "secondary-fixed": "#6ffbbe"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "sm": "8px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "gutter": "12px",
+                        "xs": "4px",
+                        "margin-desktop": "32px",
+                        "xl": "32px"
+                    },
+                    "fontFamily": {
+                        "mono-label": ["JetBrains Mono"],
+                        "headline-md": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "data-sm": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "data-lg": ["Inter"],
+                        "body-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "mono-label": ["11px", { "lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "data-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "data-lg": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #0F172A; }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid #334155;
+        }
+        .data-table th, .data-table td { padding: 8px 12px; }
+        .data-table tr:not(:last-child) { border-bottom: 1px solid #334155; }
+        .buy-text { color: #10B981; }
+        .sell-text { color: #F43F5E; }
+        .neutral-text { color: #94A3B8; }
+        
+        /* Simulated Candlestick Chart Styles */
+        .chart-container { position: relative; height: 100%; width: 100%; display: flex; flex-direction: column; }
+        .main-chart { flex: 1; min-height: 400px; background: #0F172A; border: 1px solid #334155; margin-bottom: 8px; position: relative; overflow: hidden; }
+        .sub-pane { height: 120px; background: #0F172A; border: 1px solid #334155; margin-bottom: 8px; position: relative; overflow: hidden; }
+        .chart-grid { position: absolute; inset: 0; background-image: linear-gradient(to right, #1E293B 1px, transparent 1px), linear-gradient(to bottom, #1E293B 1px, transparent 1px); background-size: 50px 50px; opacity: 0.5; }
+        .candle { position: absolute; width: 6px; }
+        .candle-wick { position: absolute; width: 2px; left: 2px; }
+        .up-candle { background-color: #10B981; }
+        .down-candle { background-color: #F43F5E; }
+    </style>
+<style>
+      body::-webkit-scrollbar { display: none; }
+      html { scrollbar-width: none; }
+      body { -ms-overflow-style: none; min-height: auto !important; }
+    </style><style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}[type='text'],input:where(:not([type])),[type='email'],[type='url'],[type='password'],[type='number'],[type='date'],[type='datetime-local'],[type='month'],[type='search'],[type='tel'],[type='time'],[type='week'],[multiple],textarea,select{-webkit-appearance:none;appearance:none;background-color:#fff;border-color:#6b7280;border-width:1px;border-radius:0px;padding-top:0.5rem;padding-right:0.75rem;padding-bottom:0.5rem;padding-left:0.75rem;font-size:1rem;line-height:1.5rem;--tw-shadow:0 0 #0000;}[type='text']:focus, input:where(:not([type])):focus, [type='email']:focus, [type='url']:focus, [type='password']:focus, [type='number']:focus, [type='date']:focus, [type='datetime-local']:focus, [type='month']:focus, [type='search']:focus, [type='tel']:focus, [type='time']:focus, [type='week']:focus, [multiple]:focus, textarea:focus, select:focus{outline:2px solid transparent;outline-offset:2px;--tw-ring-inset:var(--tw-empty,/*!*/ /*!*/);--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:#2563eb;--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);border-color:#2563eb}input::placeholder,textarea::placeholder{color:#6b7280;opacity:1}::-webkit-datetime-edit-fields-wrapper{padding:0}::-webkit-date-and-time-value{min-height:1.5em;text-align:inherit}::-webkit-datetime-edit{display:inline-flex}::-webkit-datetime-edit,::-webkit-datetime-edit-year-field,::-webkit-datetime-edit-month-field,::-webkit-datetime-edit-day-field,::-webkit-datetime-edit-hour-field,::-webkit-datetime-edit-minute-field,::-webkit-datetime-edit-second-field,::-webkit-datetime-edit-millisecond-field,::-webkit-datetime-edit-meridiem-field{padding-top:0;padding-bottom:0}select{background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");background-position:right 0.5rem center;background-repeat:no-repeat;background-size:1.5em 1.5em;padding-right:2.5rem;print-color-adjust:exact}[multiple],[size]:where(select:not([size="1"])){background-image:initial;background-position:initial;background-repeat:unset;background-size:initial;padding-right:0.75rem;print-color-adjust:unset}[type='checkbox'],[type='radio']{-webkit-appearance:none;appearance:none;padding:0;print-color-adjust:exact;display:inline-block;vertical-align:middle;background-origin:border-box;-webkit-user-select:none;user-select:none;flex-shrink:0;height:1rem;width:1rem;color:#2563eb;background-color:#fff;border-color:#6b7280;border-width:1px;--tw-shadow:0 0 #0000}[type='checkbox']{border-radius:0px}[type='radio']{border-radius:100%}[type='checkbox']:focus,[type='radio']:focus{outline:2px solid transparent;outline-offset:2px;--tw-ring-inset:var(--tw-empty,/*!*/ /*!*/);--tw-ring-offset-width:2px;--tw-ring-offset-color:#fff;--tw-ring-color:#2563eb;--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow)}[type='checkbox']:checked,[type='radio']:checked{border-color:transparent;background-color:currentColor;background-size:100% 100%;background-position:center;background-repeat:no-repeat}[type='checkbox']:checked{background-image:url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");}@media (forced-colors: active) {[type='checkbox']:checked{-webkit-appearance:auto;appearance:auto}}[type='radio']:checked{background-image:url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='8' cy='8' r='3'/%3e%3c/svg%3e");}@media (forced-colors: active) {[type='radio']:checked{-webkit-appearance:auto;appearance:auto}}[type='checkbox']:checked:hover,[type='checkbox']:checked:focus,[type='radio']:checked:hover,[type='radio']:checked:focus{border-color:transparent;background-color:currentColor}[type='checkbox']:indeterminate{background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 16 16'%3e%3cpath stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M4 8h8'/%3e%3c/svg%3e");border-color:transparent;background-color:currentColor;background-size:100% 100%;background-position:center;background-repeat:no-repeat;}@media (forced-colors: active) {[type='checkbox']:indeterminate{-webkit-appearance:auto;appearance:auto}}[type='checkbox']:indeterminate:hover,[type='checkbox']:indeterminate:focus{border-color:transparent;background-color:currentColor}[type='file']{background:unset;border-color:inherit;border-width:0;border-radius:0;padding:0;font-size:unset;line-height:inherit}[type='file']:focus{outline:1px solid ButtonText;outline:1px auto -webkit-focus-ring-color}.absolute{position:absolute}.relative{position:relative}.inset-0{inset:0px}.-bottom-2{bottom:-0.5rem}.-bottom-4{bottom:-1rem}.bottom-0{bottom:0px}.bottom-16{bottom:4rem}.bottom-20{bottom:5rem}.bottom-24{bottom:6rem}.bottom-32{bottom:8rem}.left-0{left:0px}.left-1\/2{left:50%}.left-10{left:2.5rem}.left-20{left:5rem}.left-40{left:10rem}.left-sm{left:8px}.right-0{right:0px}.top-0{top:0px}.top-sm{top:8px}.z-10{z-index:10}.z-50{z-index:50}.mb-md{margin-bottom:16px}.mb-sm{margin-bottom:8px}.ml-md{margin-left:16px}.mr-xs{margin-right:4px}.mt-sm{margin-top:8px}.flex{display:flex}.hidden{display:none}.h-10{height:2.5rem}.h-12{height:3rem}.h-14{height:3.5rem}.h-16{height:4rem}.h-20{height:5rem}.h-24{height:6rem}.h-32{height:8rem}.h-4{height:1rem}.h-48{height:12rem}.h-8{height:2rem}.h-full{height:100%}.h-screen{height:100vh}.min-h-screen{min-height:100vh}.w-12{width:3rem}.w-2{width:0.5rem}.w-24{width:6rem}.w-4{width:1rem}.w-48{width:12rem}.w-80{width:20rem}.w-full{width:100%}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}.origin-bottom{transform-origin:bottom}.-translate-x-1\/2{--tw-translate-x:-50%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.translate-y-1\/2{--tw-translate-y:50%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.transform{transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-pointer{cursor:pointer}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-md{gap:16px}.gap-sm{gap:8px}.gap-xs{gap:4px}.overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}.rounded{border-radius:0.125rem}.rounded-full{border-radius:0.75rem}.rounded-lg{border-radius:0.25rem}.border{border-width:1px}.border-8{border-width:8px}.border-b{border-bottom-width:1px}.border-b-2{border-bottom-width:2px}.border-l{border-left-width:1px}.border-r{border-right-width:1px}.border-none{border-style:none}.border-outline-variant{--tw-border-opacity:1;border-color:rgb(66 71 84 / var(--tw-border-opacity, 1))}.border-primary{--tw-border-opacity:1;border-color:rgb(173 198 255 / var(--tw-border-opacity, 1))}.border-surface-variant{--tw-border-opacity:1;border-color:rgb(45 52 73 / var(--tw-border-opacity, 1))}.bg-background{--tw-bg-opacity:1;background-color:rgb(11 19 38 / var(--tw-bg-opacity, 1))}.bg-on-surface{--tw-bg-opacity:1;background-color:rgb(218 226 253 / var(--tw-bg-opacity, 1))}.bg-primary{--tw-bg-opacity:1;background-color:rgb(173 198 255 / var(--tw-bg-opacity, 1))}.bg-primary-container{--tw-bg-opacity:1;background-color:rgb(77 142 255 / var(--tw-bg-opacity, 1))}.bg-surface{--tw-bg-opacity:1;background-color:rgb(11 19 38 / var(--tw-bg-opacity, 1))}.bg-surface-container{--tw-bg-opacity:1;background-color:rgb(23 31 51 / var(--tw-bg-opacity, 1))}.bg-surface-container-high{--tw-bg-opacity:1;background-color:rgb(34 42 61 / var(--tw-bg-opacity, 1))}.bg-surface-container-low{--tw-bg-opacity:1;background-color:rgb(19 27 46 / var(--tw-bg-opacity, 1))}.bg-surface-variant{--tw-bg-opacity:1;background-color:rgb(45 52 73 / var(--tw-bg-opacity, 1))}.bg-surface\/50{background-color:rgb(11 19 38 / 0.5)}.bg-transparent{background-color:transparent}.p-0{padding:0px}.p-md{padding:16px}.p-sm{padding:8px}.p-xs{padding:4px}.px-margin-desktop{padding-left:32px;padding-right:32px}.px-md{padding-left:16px;padding-right:16px}.px-sm{padding-left:8px;padding-right:8px}.py-md{padding-top:16px;padding-bottom:16px}.py-sm{padding-top:8px;padding-bottom:8px}.py-xs{padding-top:4px;padding-bottom:4px}.pb-xs{padding-bottom:4px}.pr-xs{padding-right:4px}.text-left{text-align:left}.text-right{text-align:right}.align-middle{vertical-align:middle}.font-body-sm{font-family:Inter}.font-data-sm{font-family:Inter}.font-headline-md{font-family:Inter}.font-headline-sm{font-family:Inter}.font-mono-label{font-family:JetBrains Mono}.text-\[10px\]{font-size:10px}.text-\[16px\]{font-size:16px}.text-\[18px\]{font-size:18px}.text-data-lg{font-size:20px;line-height:28px;font-weight:600}.text-data-sm{font-size:12px;line-height:16px;font-weight:500}.text-headline-md{font-size:24px;line-height:32px;letter-spacing:-0.01em;font-weight:600}.text-headline-sm{font-size:18px;line-height:24px;font-weight:600}.text-mono-label{font-size:11px;line-height:14px;letter-spacing:0.05em;font-weight:500}.font-bold{font-weight:700}.font-normal{font-weight:400}.text-on-background{--tw-text-opacity:1;color:rgb(218 226 253 / var(--tw-text-opacity, 1))}.text-on-primary-container{--tw-text-opacity:1;color:rgb(0 40 93 / var(--tw-text-opacity, 1))}.text-on-surface{--tw-text-opacity:1;color:rgb(218 226 253 / var(--tw-text-opacity, 1))}.text-on-surface-variant{--tw-text-opacity:1;color:rgb(194 198 214 / var(--tw-text-opacity, 1))}.text-outline{--tw-text-opacity:1;color:rgb(140 144 159 / var(--tw-text-opacity, 1))}.text-primary{--tw-text-opacity:1;color:rgb(173 198 255 / var(--tw-text-opacity, 1))}.transition-colors{transition-property:color, background-color, border-color, fill, stroke, -webkit-text-decoration-color;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, -webkit-text-decoration-color;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-opacity{transition-property:opacity;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.hover\:bg-surface-container-high:hover{--tw-bg-opacity:1;background-color:rgb(34 42 61 / var(--tw-bg-opacity, 1))}.hover\:text-on-surface:hover{--tw-text-opacity:1;color:rgb(218 226 253 / var(--tw-text-opacity, 1))}.hover\:opacity-90:hover{opacity:0.9}.focus\:ring-0:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.active\:opacity-80:active{opacity:0.8}.dark\:bg-surface:is(.dark *){--tw-bg-opacity:1;background-color:rgb(11 19 38 / var(--tw-bg-opacity, 1))}@media (min-width: 768px){.md\:flex{display:flex}}</style></head>
+<body class="text-on-background min-h-screen flex flex-col font-body-sm h-screen overflow-hidden">
+<!-- TopNavBar -->
+<header class="bg-surface dark:bg-surface flex justify-between items-center w-full px-margin-desktop h-16 border-b border-outline-variant docked full-width top-0 z-50 shrink-0">
+<div class="flex items-center gap-md">
+<span class="font-mono-label text-data-lg font-bold text-primary">TERMINAL.X</span>
+<div class="flex items-center bg-surface-container-low border border-outline-variant rounded px-sm py-xs">
+<span class="material-symbols-outlined text-outline text-[18px] mr-xs">search</span>
+<input class="bg-transparent border-none text-on-surface font-mono-label text-data-sm focus:ring-0 w-24 p-0" placeholder="AAPL" type="text" value="AAPL">
+</div>
+</div>
+<nav class="hidden md:flex h-full">
+<a class="h-full flex items-center px-md text-on-surface-variant hover:bg-surface-container-high transition-colors font-headline-sm text-headline-sm" href="https://app-companion-430619.appspot.com/projects/16415331749989864701?pli=1&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.en.9vdPKhB0RUg.O%2Fd%3D1%2Frs%3DAHpOoo97anj7zZ432JcN58tqJJp_A6WeOw%2Fm%3D__features__#">Dashboard</a>
+<a class="h-full flex items-center px-md text-on-surface-variant hover:bg-surface-container-high transition-colors font-headline-sm text-headline-sm" href="https://app-companion-430619.appspot.com/projects/16415331749989864701?pli=1&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.en.9vdPKhB0RUg.O%2Fd%3D1%2Frs%3DAHpOoo97anj7zZ432JcN58tqJJp_A6WeOw%2Fm%3D__features__#">Markets</a>
+<a class="h-full flex items-center px-md text-on-surface-variant hover:bg-surface-container-high transition-colors font-headline-sm text-headline-sm" href="https://app-companion-430619.appspot.com/projects/16415331749989864701?pli=1&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.en.9vdPKhB0RUg.O%2Fd%3D1%2Frs%3DAHpOoo97anj7zZ432JcN58tqJJp_A6WeOw%2Fm%3D__features__#">Portfolio</a>
+<a class="h-full flex items-center px-md text-primary border-b-2 border-primary bg-surface-container-high transition-colors font-headline-sm text-headline-sm" href="https://app-companion-430619.appspot.com/projects/16415331749989864701?pli=1&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.en.9vdPKhB0RUg.O%2Fd%3D1%2Frs%3DAHpOoo97anj7zZ432JcN58tqJJp_A6WeOw%2Fm%3D__features__#">Analytics</a>
+</nav>
+<div class="flex items-center gap-sm">
+<button class="text-on-surface-variant hover:bg-surface-container-high p-sm rounded transition-colors cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:bg-surface-container-high p-sm rounded transition-colors cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="bg-primary-container text-on-primary-container font-data-sm px-md py-sm rounded hover:opacity-90 transition-opacity ml-md">Trade</button>
+</div>
+</header>
+<!-- Main Layout -->
+<div class="flex flex-1 overflow-hidden">
+<!-- Left Sidebar: Technical Summary & Oscillators -->
+<aside class="w-80 border-r border-outline-variant bg-surface-container-low flex flex-col overflow-y-auto shrink-0 custom-scrollbar p-md gap-md">
+<div class="glass-panel rounded-lg p-md">
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-md">Technical Summary</h3>
+<div class="relative h-32 flex items-center justify-center">
+<!-- Gauge Placeholder -->
+<div class="w-48 h-24 overflow-hidden relative">
+<div class="w-48 h-48 rounded-full border-8 border-surface-variant absolute top-0 left-0" style="border-top-color: #F43F5E; border-right-color: #F43F5E; border-bottom-color: transparent; border-left-color: #10B981; transform: rotate(-45deg);"></div>
+<div class="absolute bottom-0 left-1/2 w-2 h-20 bg-primary rounded-full origin-bottom" style="transform: translateX(-50%) rotate(25deg);"></div>
+<div class="absolute bottom-0 left-1/2 w-4 h-4 bg-on-surface rounded-full transform -translate-x-1/2 translate-y-1/2"></div>
+</div>
+</div>
+<div class="flex justify-between font-mono-label text-mono-label mt-sm">
+<span class="sell-text">Strong Sell</span>
+<span class="text-primary font-bold">BUY</span>
+<span class="buy-text">Strong Buy</span>
+</div>
+</div>
+<div class="glass-panel rounded-lg p-0 overflow-hidden flex-1">
+<h3 class="font-headline-sm text-headline-sm text-on-surface p-md border-b border-outline-variant">Oscillators</h3>
+<table class="w-full data-table font-mono-label text-mono-label text-left">
+<thead>
+<tr class="text-outline border-b border-outline-variant bg-surface-container">
+<th>Name</th>
+<th>Value</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RSI (14)</td>
+<td>58.42</td>
+<td class="buy-text">Buy</td>
+</tr>
+<tr>
+<td>STOCH (9,6)</td>
+<td>64.12</td>
+<td class="neutral-text">Neutral</td>
+</tr>
+<tr>
+<td>MACD (12,26)</td>
+<td>1.24</td>
+<td class="buy-text">Buy</td>
+</tr>
+<tr>
+<td>ADX (14)</td>
+<td>22.15</td>
+<td class="neutral-text">Neutral</td>
+</tr>
+<tr>
+<td>Williams %R</td>
+<td>-35.80</td>
+<td class="sell-text">Sell</td>
+</tr>
+</tbody>
+</table>
+</div>
+</aside>
+<!-- Center Canvas: Main Chart -->
+<main class="flex-1 p-md flex flex-col overflow-hidden bg-background">
+<div class="flex justify-between items-center mb-sm">
+<div class="flex items-center gap-md">
+<h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-sm">
+                        AAPL <span class="font-mono-label text-data-lg text-outline font-normal">Apple Inc.</span>
+</h2>
+<span class="font-mono-label text-data-lg buy-text">185.92 <span class="material-symbols-outlined text-[16px] align-middle">arrow_upward</span>1.2%</span>
+</div>
+<div class="flex gap-xs bg-surface-container-low p-xs rounded border border-outline-variant">
+<button class="px-sm py-xs font-mono-label text-mono-label rounded text-outline hover:text-on-surface">1D</button>
+<button class="px-sm py-xs font-mono-label text-mono-label rounded text-outline hover:text-on-surface">1W</button>
+<button class="px-sm py-xs font-mono-label text-mono-label rounded bg-surface-variant text-on-surface">1M</button>
+<button class="px-sm py-xs font-mono-label text-mono-label rounded text-outline hover:text-on-surface">3M</button>
+</div>
+</div>
+<div class="chart-container flex-1">
+<!-- Main Price Chart -->
+<div class="main-chart rounded">
+<div class="chart-grid"></div>
+<!-- Y-Axis Labels -->
+<div class="absolute right-0 top-0 bottom-0 w-12 border-l border-outline-variant bg-surface/50 flex flex-col justify-between py-md font-mono-label text-mono-label text-outline text-right pr-xs">
+<span>190</span>
+<span>188</span>
+<span>186</span>
+<span>184</span>
+<span>182</span>
+</div>
+<!-- Simulated Candles -->
+<div class="absolute bottom-20 left-10 h-32">
+<div class="candle up-candle h-12 bottom-0"></div>
+<div class="candle-wick up-candle h-20 -bottom-4"></div>
+</div>
+<div class="absolute bottom-24 left-20 h-32">
+<div class="candle down-candle h-8 bottom-0"></div>
+<div class="candle-wick down-candle h-16 -bottom-2"></div>
+</div>
+<div class="absolute bottom-16 left-30 h-32">
+<div class="candle up-candle h-16 bottom-0"></div>
+<div class="candle-wick up-candle h-24 -bottom-4"></div>
+</div>
+<div class="absolute bottom-32 left-40 h-32">
+<div class="candle up-candle h-10 bottom-0"></div>
+<div class="candle-wick up-candle h-14 -bottom-2"></div>
+</div>
+</div>
+<!-- RSI Sub-pane -->
+<div class="sub-pane rounded">
+<div class="chart-grid"></div>
+<div class="absolute top-sm left-sm font-mono-label text-mono-label text-outline z-10">RSI (14) <span class="text-on-surface">58.42</span></div>
+<div class="absolute right-0 top-0 bottom-0 w-12 border-l border-outline-variant bg-surface/50 flex flex-col justify-between py-xs font-mono-label text-mono-label text-outline text-right pr-xs">
+<span>70</span>
+<span>50</span>
+<span>30</span>
+</div>
+<!-- RSI Line (Simulated) -->
+<svg class="absolute inset-0 w-full h-full" preserveAspectRatio="none">
+<path d="M0,60 L50,40 L100,50 L150,30 L200,45 L250,70 L300,55 L350,40" fill="none" stroke="#adc6ff" stroke-width="1.5"></path>
+<line stroke="#424754" stroke-dasharray="4,4" stroke-width="1" x1="0" x2="100%" y1="30%" y2="30%"></line>
+<line stroke="#424754" stroke-dasharray="4,4" stroke-width="1" x1="0" x2="100%" y1="70%" y2="70%"></line>
+</svg>
+</div>
+<!-- MACD Sub-pane -->
+<div class="sub-pane rounded">
+<div class="chart-grid"></div>
+<div class="absolute top-sm left-sm font-mono-label text-mono-label text-outline z-10">MACD (12,26,9) <span class="text-on-surface">1.24</span> <span class="text-primary">1.10</span> <span class="text-outline">0.14</span></div>
+<div class="absolute right-0 top-0 bottom-0 w-12 border-l border-outline-variant bg-surface/50 flex flex-col justify-center font-mono-label text-mono-label text-outline text-right pr-xs">
+<span>0</span>
+</div>
+<!-- MACD Lines & Histogram (Simulated) -->
+<svg class="absolute inset-0 w-full h-full" preserveAspectRatio="none">
+<line stroke="#424754" stroke-width="1" x1="0" x2="100%" y1="50%" y2="50%"></line>
+<!-- Histogram -->
+<rect fill="#10B981" height="10%" opacity="0.5" width="4" x="20" y="40%"></rect>
+<rect fill="#10B981" height="20%" opacity="0.8" width="4" x="40" y="30%"></rect>
+<rect fill="#10B981" height="5%" opacity="0.5" width="4" x="60" y="45%"></rect>
+<rect fill="#F43F5E" height="15%" opacity="0.5" width="4" x="80" y="50%"></rect>
+<!-- Lines -->
+<path d="M0,60 L50,40 L100,50 L150,30 L200,45 L250,70" fill="none" stroke="#adc6ff" stroke-width="1.5"></path>
+<path d="M0,65 L50,45 L100,55 L150,35 L200,50 L250,65" fill="none" stroke="#ffb2b7" stroke-width="1.5"></path>
+</svg>
+</div>
+</div>
+</main>
+<!-- Right Sidebar: Widgets -->
+<aside class="w-80 border-l border-outline-variant bg-surface-container-low flex flex-col overflow-y-auto shrink-0 custom-scrollbar p-md gap-md">
+<div class="glass-panel rounded-lg p-0 overflow-hidden">
+<h3 class="font-headline-sm text-headline-sm text-on-surface p-md border-b border-outline-variant">Moving Averages</h3>
+<table class="w-full data-table font-mono-label text-mono-label text-left">
+<thead>
+<tr class="text-outline border-b border-outline-variant bg-surface-container">
+<th>Period</th>
+<th>SMA</th>
+<th>EMA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>5</td>
+<td class="buy-text">184.20</td>
+<td class="buy-text">184.55</td>
+</tr>
+<tr>
+<td>10</td>
+<td class="buy-text">182.15</td>
+<td class="buy-text">183.10</td>
+</tr>
+<tr>
+<td>20</td>
+<td class="buy-text">179.80</td>
+<td class="buy-text">180.50</td>
+</tr>
+<tr>
+<td>50</td>
+<td class="buy-text">175.20</td>
+<td class="buy-text">176.40</td>
+</tr>
+<tr>
+<td>100</td>
+<td class="sell-text">188.10</td>
+<td class="sell-text">187.50</td>
+</tr>
+<tr>
+<td>200</td>
+<td class="buy-text">165.40</td>
+<td class="buy-text">168.20</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="glass-panel rounded-lg p-0 overflow-hidden">
+<h3 class="font-headline-sm text-headline-sm text-on-surface p-md border-b border-outline-variant">Pattern Recognition</h3>
+<div class="p-md flex flex-col gap-sm">
+<div class="flex justify-between items-center bg-surface-container p-sm rounded border border-outline-variant">
+<div>
+<div class="font-data-sm text-on-surface">Bullish Engulfing</div>
+<div class="font-mono-label text-outline">1D Timeframe</div>
+</div>
+<div class="text-right">
+<div class="font-mono-label buy-text text-data-lg">85%</div>
+<div class="font-mono-label text-outline text-[10px]">Confidence</div>
+</div>
+</div>
+<div class="flex justify-between items-center bg-surface-container p-sm rounded border border-outline-variant">
+<div>
+<div class="font-data-sm text-on-surface">Ascending Triangle</div>
+<div class="font-mono-label text-outline">1W Timeframe</div>
+</div>
+<div class="text-right">
+<div class="font-mono-label neutral-text text-data-lg">62%</div>
+<div class="font-mono-label text-outline text-[10px]">Confidence</div>
+</div>
+</div>
+</div>
+</div>
+<div class="glass-panel rounded-lg p-0 overflow-hidden">
+<h3 class="font-headline-sm text-headline-sm text-on-surface p-md border-b border-outline-variant">Volatility</h3>
+<div class="p-md flex flex-col gap-sm font-mono-label text-mono-label">
+<div class="flex justify-between border-b border-outline-variant pb-xs">
+<span class="text-outline">ATR (14)</span>
+<span class="text-on-surface">2.45</span>
+</div>
+<div class="flex justify-between border-b border-outline-variant pb-xs">
+<span class="text-outline">BB Width</span>
+<span class="text-on-surface">4.2%</span>
+</div>
+<div class="flex justify-between">
+<span class="text-outline">IV Rank</span>
+<span class="sell-text">15.2%</span>
+</div>
+</div>
+</div>
+</aside>
+</div>
+</body></html>

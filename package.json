@@ -1,41 +1,15 @@
 {
-  "name": "nse-mcp",
+  "name": "trade-vision-app",
   "version": "0.1.0",
-  "description": "MCP server exposing NSE India market data — bulk/block deals, insider trades, FII/DII flows, indices, quotes, and more.",
+  "description": "Trade Vision: NSE market MCP server + web UI.",
   "license": "MIT",
-  "type": "module",
-  "main": "dist/index.js",
-  "bin": {
-    "nse-mcp": "dist/index.js"
-  },
-  "scripts": {
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "dev": "tsc --watch"
-  },
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.0",
-    "yahoo-finance2": "^3.14.0",
-    "zod": "^3.22.0"
-  },
-  "devDependencies": {
-    "@types/node": "^20.0.0",
-    "typescript": "^5.6.0"
-  },
-  "engines": {
-    "node": ">=20"
-  },
-  "keywords": [
-    "mcp",
-    "nse",
-    "india",
-    "stock",
-    "market",
-    "insider-trading",
-    "bulk-deals"
+  "private": true,
+  "workspaces": [
+    "server",
+    "web"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/manitgupta/nse-mcp"
+  "scripts": {
+    "build": "npm --prefix server run build && npm --prefix web run build",
+    "web:start": "npm --prefix web run start"
   }
 }

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<!-- saved from url=(0012)about:srcdoc -->
+<html class="dark" lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>AlphaTerminal - Market Screeners</title>
+<script src="https://cdn.tailwindcss.com/?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline-variant": "#424754",
+                        "on-surface-variant": "#c2c6d6",
+                        "secondary": "#4edea3",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-container": "#ff516a",
+                        "outline": "#8c909f",
+                        "on-tertiary-container": "#5b0017",
+                        "on-secondary": "#003824",
+                        "error": "#ffb4ab",
+                        "on-primary-fixed": "#001a42",
+                        "on-tertiary-fixed-variant": "#92002a",
+                        "on-surface": "#dae2fd",
+                        "surface-container-low": "#131b2e",
+                        "tertiary-fixed-dim": "#ffb2b7",
+                        "surface-container-lowest": "#060e20",
+                        "on-tertiary": "#67001b",
+                        "on-secondary-container": "#00311f",
+                        "error-container": "#93000a",
+                        "surface-variant": "#2d3449",
+                        "primary-fixed": "#d8e2ff",
+                        "primary-container": "#4d8eff",
+                        "on-error": "#690005",
+                        "surface-tint": "#adc6ff",
+                        "inverse-on-surface": "#283044",
+                        "on-background": "#dae2fd",
+                        "secondary-fixed": "#6ffbbe",
+                        "primary-fixed-dim": "#adc6ff",
+                        "surface-dim": "#0b1326",
+                        "on-tertiary-fixed": "#40000d",
+                        "surface-bright": "#31394d",
+                        "tertiary": "#ffb2b7",
+                        "secondary-container": "#00a572",
+                        "surface-container-high": "#222a3d",
+                        "background": "#0b1326",
+                        "on-primary-fixed-variant": "#004395",
+                        "tertiary-fixed": "#ffdadb",
+                        "surface-container-highest": "#2d3449",
+                        "on-secondary-fixed-variant": "#005236",
+                        "surface": "#0b1326",
+                        "primary": "#adc6ff",
+                        "inverse-surface": "#dae2fd",
+                        "on-primary-container": "#00285d",
+                        "inverse-primary": "#005ac2",
+                        "on-secondary-fixed": "#002113",
+                        "secondary-fixed-dim": "#4edea3",
+                        "on-primary": "#002e6a",
+                        "surface-container": "#171f33"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "xl": "32px",
+                        "sm": "8px",
+                        "md": "16px",
+                        "margin-desktop": "32px",
+                        "gutter": "12px",
+                        "margin-mobile": "16px",
+                        "lg": "24px"
+                    },
+                    "fontFamily": {
+                        "mono-label": ["JetBrains Mono"],
+                        "headline-sm": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "data-lg": ["Inter"],
+                        "data-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "mono-label": ["11px", { "lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "data-lg": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "data-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }]
+                    }
+                },
+            }
+        }
+    </script>
+<style>
+        body { background-color: #0b1326; color: #dae2fd; }
+        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid #334155; }
+        .data-table th, .data-table td { padding: 8px 12px; border-bottom: 1px solid #2d3449; }
+        .data-table tr:nth-child(even) { background-color: rgba(45, 52, 73, 0.3); }
+        .data-table tr:hover { background-color: rgba(77, 142, 255, 0.1); cursor: pointer; }
+        .text-success { color: #10B981; }
+        .text-danger { color: #F43F5E; }
+    </style>
+<style>
+      body::-webkit-scrollbar { display: none; }
+      html { scrollbar-width: none; }
+      body { -ms-overflow-style: none; min-height: auto !important; }
+    </style><style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}[type='text'],input:where(:not([type])),[type='email'],[type='url'],[type='password'],[type='number'],[type='date'],[type='datetime-local'],[type='month'],[type='search'],[type='tel'],[type='time'],[type='week'],[multiple],textarea,select{-webkit-appearance:none;appearance:none;background-color:#fff;border-color:#6b7280;border-width:1px;border-radius:0px;padding-top:0.5rem;padding-right:0.75rem;padding-bottom:0.5rem;padding-left:0.75rem;font-size:1rem;line-height:1.5rem;--tw-shadow:0 0 #0000;}[type='text']:focus, input:where(:not([type])):focus, [type='email']:focus, [type='url']:focus, [type='password']:focus, [type='number']:focus, [type='date']:focus, [type='datetime-local']:focus, [type='month']:focus, [type='search']:focus, [type='tel']:focus, [type='time']:focus, [type='week']:focus, [multiple]:focus, textarea:focus, select:focus{outline:2px solid transparent;outline-offset:2px;--tw-ring-inset:var(--tw-empty,/*!*/ /*!*/);--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:#2563eb;--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);border-color:#2563eb}input::placeholder,textarea::placeholder{color:#6b7280;opacity:1}::-webkit-datetime-edit-fields-wrapper{padding:0}::-webkit-date-and-time-value{min-height:1.5em;text-align:inherit}::-webkit-datetime-edit{display:inline-flex}::-webkit-datetime-edit,::-webkit-datetime-edit-year-field,::-webkit-datetime-edit-month-field,::-webkit-datetime-edit-day-field,::-webkit-datetime-edit-hour-field,::-webkit-datetime-edit-minute-field,::-webkit-datetime-edit-second-field,::-webkit-datetime-edit-millisecond-field,::-webkit-datetime-edit-meridiem-field{padding-top:0;padding-bottom:0}select{background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");background-position:right 0.5rem center;background-repeat:no-repeat;background-size:1.5em 1.5em;padding-right:2.5rem;print-color-adjust:exact}[multiple],[size]:where(select:not([size="1"])){background-image:initial;background-position:initial;background-repeat:unset;background-size:initial;padding-right:0.75rem;print-color-adjust:unset}[type='checkbox'],[type='radio']{-webkit-appearance:none;appearance:none;padding:0;print-color-adjust:exact;display:inline-block;vertical-align:middle;background-origin:border-box;-webkit-user-select:none;user-select:none;flex-shrink:0;height:1rem;width:1rem;color:#2563eb;background-color:#fff;border-color:#6b7280;border-width:1px;--tw-shadow:0 0 #0000}[type='checkbox']{border-radius:0px}[type='radio']{border-radius:100%}[type='checkbox']:focus,[type='radio']:focus{outline:2px solid transparent;outline-offset:2px;--tw-ring-inset:var(--tw-empty,/*!*/ /*!*/);--tw-ring-offset-width:2px;--tw-ring-offset-color:#fff;--tw-ring-color:#2563eb;--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow)}[type='checkbox']:checked,[type='radio']:checked{border-color:transparent;background-color:currentColor;background-size:100% 100%;background-position:center;background-repeat:no-repeat}[type='checkbox']:checked{background-image:url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");}@media (forced-colors: active) {[type='checkbox']:checked{-webkit-appearance:auto;appearance:auto}}[type='radio']:checked{background-image:url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='8' cy='8' r='3'/%3e%3c/svg%3e");}@media (forced-colors: active) {[type='radio']:checked{-webkit-appearance:auto;appearance:auto}}[type='checkbox']:checked:hover,[type='checkbox']:checked:focus,[type='radio']:checked:hover,[type='radio']:checked:focus{border-color:transparent;background-color:currentColor}[type='checkbox']:indeterminate{background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 16 16'%3e%3cpath stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M4 8h8'/%3e%3c/svg%3e");border-color:transparent;background-color:currentColor;background-size:100% 100%;background-position:center;background-repeat:no-repeat;}@media (forced-colors: active) {[type='checkbox']:indeterminate{-webkit-appearance:auto;appearance:auto}}[type='checkbox']:indeterminate:hover,[type='checkbox']:indeterminate:focus{border-color:transparent;background-color:currentColor}[type='file']{background:unset;border-color:inherit;border-width:0;border-radius:0;padding:0;font-size:unset;line-height:inherit}[type='file']:focus{outline:1px solid ButtonText;outline:1px auto -webkit-focus-ring-color}.fixed{position:fixed}.left-0{left:0px}.top-0{top:0px}.top-16{top:4rem}.z-40{z-index:40}.z-50{z-index:50}.mx-2{margin-left:0.5rem;margin-right:0.5rem}.mx-auto{margin-left:auto;margin-right:auto}.mx-md{margin-left:16px;margin-right:16px}.my-1{margin-top:0.25rem;margin-bottom:0.25rem}.mb-lg{margin-bottom:24px}.mt-auto{margin-top:auto}.mt-xs{margin-top:4px}.flex{display:flex}.grid{display:grid}.hidden{display:none}.h-16{height:4rem}.h-\[calc\(100vh-64px\)\]{height:calc(100vh - 64px)}.h-full{height:100%}.h-screen{height:100vh}.w-64{width:16rem}.w-full{width:100%}.max-w-\[1600px\]{max-width:1600px}.flex-1{flex:1 1 0%}.scale-95{--tw-scale-x:.95;--tw-scale-y:.95;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-pointer{cursor:pointer}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-between{justify-content:space-between}.gap-lg{gap:24px}.gap-md{gap:16px}.gap-sm{gap:8px}.gap-xl{gap:32px}.gap-xs{gap:4px}.overflow-hidden{overflow:hidden}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}.rounded{border-radius:0.125rem}.rounded-lg{border-radius:0.25rem}.border-b{border-bottom-width:1px}.border-b-2{border-bottom-width:2px}.border-r{border-right-width:1px}.border-t{border-top-width:1px}.border-outline-variant{--tw-border-opacity:1;border-color:rgb(66 71 84 / var(--tw-border-opacity, 1))}.border-secondary{--tw-border-opacity:1;border-color:rgb(78 222 163 / var(--tw-border-opacity, 1))}.bg-background{--tw-bg-opacity:1;background-color:rgb(11 19 38 / var(--tw-bg-opacity, 1))}.bg-secondary-container{--tw-bg-opacity:1;background-color:rgb(0 165 114 / var(--tw-bg-opacity, 1))}.bg-surface-container-high{--tw-bg-opacity:1;background-color:rgb(34 42 61 / var(--tw-bg-opacity, 1))}.bg-surface-container-low{--tw-bg-opacity:1;background-color:rgb(19 27 46 / var(--tw-bg-opacity, 1))}.bg-surface-container-lowest{--tw-bg-opacity:1;background-color:rgb(6 14 32 / var(--tw-bg-opacity, 1))}.p-margin-mobile{padding:16px}.p-sm{padding:8px}.px-margin-desktop{padding-left:32px;padding-right:32px}.px-md{padding-left:16px;padding-right:16px}.px-sm{padding-left:8px;padding-right:8px}.py-md{padding-top:16px;padding-bottom:16px}.py-sm{padding-top:8px;padding-bottom:8px}.py-xs{padding-top:4px;padding-bottom:4px}.pb-1{padding-bottom:0.25rem}.pt-16{padding-top:4rem}.pt-md{padding-top:16px}.text-left{text-align:left}.text-right{text-align:right}.font-body-md{font-family:Inter}.font-body-sm{font-family:Inter}.font-headline-md{font-family:Inter}.font-headline-sm{font-family:Inter}.font-mono-label{font-family:JetBrains Mono}.text-\[10px\]{font-size:10px}.text-\[16px\]{font-size:16px}.text-body-sm{font-size:14px;line-height:20px;font-weight:400}.text-headline-md{font-size:24px;line-height:32px;letter-spacing:-0.01em;font-weight:600}.text-headline-sm{font-size:18px;line-height:24px;font-weight:600}.text-mono-label{font-size:11px;line-height:14px;letter-spacing:0.05em;font-weight:500}.font-bold{font-weight:700}.uppercase{text-transform:uppercase}.tracking-widest{letter-spacing:0.1em}.text-error{--tw-text-opacity:1;color:rgb(255 180 171 / var(--tw-text-opacity, 1))}.text-on-background{--tw-text-opacity:1;color:rgb(218 226 253 / var(--tw-text-opacity, 1))}.text-on-secondary-container{--tw-text-opacity:1;color:rgb(0 49 31 / var(--tw-text-opacity, 1))}.text-on-surface{--tw-text-opacity:1;color:rgb(218 226 253 / var(--tw-text-opacity, 1))}.text-on-surface-variant{--tw-text-opacity:1;color:rgb(194 198 214 / var(--tw-text-opacity, 1))}.text-primary{--tw-text-opacity:1;color:rgb(173 198 255 / var(--tw-text-opacity, 1))}.text-primary-container{--tw-text-opacity:1;color:rgb(77 142 255 / var(--tw-text-opacity, 1))}.text-secondary{--tw-text-opacity:1;color:rgb(78 222 163 / var(--tw-text-opacity, 1))}.text-tertiary-container{--tw-text-opacity:1;color:rgb(255 81 106 / var(--tw-text-opacity, 1))}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.transition-colors{transition-property:color, background-color, border-color, fill, stroke, -webkit-text-decoration-color;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, -webkit-text-decoration-color;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-transform{transition-property:transform;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-200{transition-duration:200ms}.hover\:bg-surface-variant:hover{--tw-bg-opacity:1;background-color:rgb(45 52 73 / var(--tw-bg-opacity, 1))}.hover\:text-on-surface:hover{--tw-text-opacity:1;color:rgb(218 226 253 / var(--tw-text-opacity, 1))}.active\:scale-90:active{--tw-scale-x:.9;--tw-scale-y:.9;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.dark\:bg-surface-container-low:is(.dark *){--tw-bg-opacity:1;background-color:rgb(19 27 46 / var(--tw-bg-opacity, 1))}.dark\:bg-surface-container-lowest:is(.dark *){--tw-bg-opacity:1;background-color:rgb(6 14 32 / var(--tw-bg-opacity, 1))}@media (min-width: 768px){.md\:flex{display:flex}.md\:p-margin-desktop{padding:32px}.md\:pl-64{padding-left:16rem}}@media (min-width: 1280px){.xl\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}}</style></head>
+<body class="bg-background text-on-background font-body-md antialiased overflow-hidden">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full h-16 bg-surface-container-low dark:bg-surface-container-low border-b border-outline-variant flex justify-between items-center px-margin-desktop z-50">
+<div class="flex items-center gap-xl">
+<div class="text-headline-sm font-headline-sm font-bold text-primary">AlphaTerminal</div>
+<div class="hidden md:flex gap-md font-mono-label text-mono-label">
+<a class="text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-colors duration-200 px-sm py-xs rounded" href="https://app-companion-430619.appspot.com/projects/16415331749989864701?pli=1&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.en.9vdPKhB0RUg.O%2Fd%3D1%2Frs%3DAHpOoo97anj7zZ432JcN58tqJJp_A6WeOw%2Fm%3D__features__#">Markets</a>
+<a class="text-secondary border-b-2 border-secondary pb-1 transition-colors duration-200 px-sm py-xs" href="https://app-companion-430619.appspot.com/projects/16415331749989864701?pli=1&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.en.9vdPKhB0RUg.O%2Fd%3D1%2Frs%3DAHpOoo97anj7zZ432JcN58tqJJp_A6WeOw%2Fm%3D__features__#">Screeners</a>
+<a class="text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-colors duration-200 px-sm py-xs rounded" href="https://app-companion-430619.appspot.com/projects/16415331749989864701?pli=1&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.en.9vdPKhB0RUg.O%2Fd%3D1%2Frs%3DAHpOoo97anj7zZ432JcN58tqJJp_A6WeOw%2Fm%3D__features__#">Alerts</a>
+<a class="text-on-surface-variant hover:text-on-surface hover:bg-surface-variant transition-colors duration-200 px-sm py-xs rounded" href="https://app-companion-430619.appspot.com/projects/16415331749989864701?pli=1&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.en.9vdPKhB0RUg.O%2Fd%3D1%2Frs%3DAHpOoo97anj7zZ432JcN58tqJJp_A6WeOw%2Fm%3D__features__#">Watchlists</a>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-on-surface">search</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-on-surface">account_circle</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-on-surface">settings</span>
+</div>
+</nav>
+<!-- SideNavBar -->
+<aside class="hidden md:flex fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-surface-container-lowest dark:bg-surface-container-lowest border-r border-outline-variant flex-col py-md z-40">
+<div class="px-md mb-lg">
+<div class="text-headline-sm font-headline-sm text-primary">Terminal Alpha</div>
+<div class="font-mono-label text-mono-label text-on-surface-variant mt-xs">v4.2.0-stable</div>
+</div>
+<div class="flex-1 flex flex-col gap-xs font-mono-label text-mono-label">
+<a class="flex items-center gap-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-variant mx-2 my-1 p-sm rounded-lg scale-95 active:scale-90 transition-transform" href="https://app-companion-430619.appspot.com/projects/16415331749989864701?pli=1&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.en.9vdPKhB0RUg.O%2Fd%3D1%2Frs%3DAHpOoo97anj7zZ432JcN58tqJJp_A6WeOw%2Fm%3D__features__#">
+<span class="material-symbols-outlined" style="font-variation-settings: &#39;FILL&#39; 1;">dashboard</span> Dashboard
+            </a>
+<a class="flex items-center gap-sm bg-secondary-container text-on-secondary-container mx-2 my-1 p-sm rounded-lg scale-95 active:scale-90 transition-transform" href="https://app-companion-430619.appspot.com/projects/16415331749989864701?pli=1&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.en.9vdPKhB0RUg.O%2Fd%3D1%2Frs%3DAHpOoo97anj7zZ432JcN58tqJJp_A6WeOw%2Fm%3D__features__#">
+<span class="material-symbols-outlined" style="font-variation-settings: &#39;FILL&#39; 1;">monitoring</span> Technical
+            </a>
+<a class="flex items-center gap-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-variant mx-2 my-1 p-sm rounded-lg scale-95 active:scale-90 transition-transform" href="https://app-companion-430619.appspot.com/projects/16415331749989864701?pli=1&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.en.9vdPKhB0RUg.O%2Fd%3D1%2Frs%3DAHpOoo97anj7zZ432JcN58tqJJp_A6WeOw%2Fm%3D__features__#">
+<span class="material-symbols-outlined" style="font-variation-settings: &#39;FILL&#39; 1;">account_balance</span> Financials
+            </a>
+<a class="flex items-center gap-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-variant mx-2 my-1 p-sm rounded-lg scale-95 active:scale-90 transition-transform" href="https://app-companion-430619.appspot.com/projects/16415331749989864701?pli=1&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.en.9vdPKhB0RUg.O%2Fd%3D1%2Frs%3DAHpOoo97anj7zZ432JcN58tqJJp_A6WeOw%2Fm%3D__features__#">
+<span class="material-symbols-outlined" style="font-variation-settings: &#39;FILL&#39; 1;">groups</span> Ownership
+            </a>
+<a class="flex items-center gap-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-variant mx-2 my-1 p-sm rounded-lg scale-95 active:scale-90 transition-transform" href="https://app-companion-430619.appspot.com/projects/16415331749989864701?pli=1&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.en.9vdPKhB0RUg.O%2Fd%3D1%2Frs%3DAHpOoo97anj7zZ432JcN58tqJJp_A6WeOw%2Fm%3D__features__#">
+<span class="material-symbols-outlined" style="font-variation-settings: &#39;FILL&#39; 1;">description</span> Filings
+            </a>
+<a class="flex items-center gap-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-variant mx-2 my-1 p-sm rounded-lg scale-95 active:scale-90 transition-transform" href="https://app-companion-430619.appspot.com/projects/16415331749989864701?pli=1&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.en.9vdPKhB0RUg.O%2Fd%3D1%2Frs%3DAHpOoo97anj7zZ432JcN58tqJJp_A6WeOw%2Fm%3D__features__#">
+<span class="material-symbols-outlined" style="font-variation-settings: &#39;FILL&#39; 1;">newspaper</span> News
+            </a>
+</div>
+<div class="mt-auto flex flex-col gap-xs font-mono-label text-mono-label pt-md border-t border-outline-variant mx-md">
+<a class="flex items-center gap-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-variant p-sm rounded-lg" href="https://app-companion-430619.appspot.com/projects/16415331749989864701?pli=1&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.en.9vdPKhB0RUg.O%2Fd%3D1%2Frs%3DAHpOoo97anj7zZ432JcN58tqJJp_A6WeOw%2Fm%3D__features__#">
+<span class="material-symbols-outlined">help</span> Support
+            </a>
+<a class="flex items-center gap-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-variant p-sm rounded-lg" href="https://app-companion-430619.appspot.com/projects/16415331749989864701?pli=1&amp;usegapi=1&amp;jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.en.9vdPKhB0RUg.O%2Fd%3D1%2Frs%3DAHpOoo97anj7zZ432JcN58tqJJp_A6WeOw%2Fm%3D__features__#">
+<span class="material-symbols-outlined">logout</span> Logout
+            </a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="pt-16 md:pl-64 h-screen overflow-y-auto">
+<div class="p-margin-mobile md:p-margin-desktop max-w-[1600px] mx-auto">
+<header class="mb-lg">
+<h1 class="font-headline-md text-headline-md text-on-surface">Market Screeners</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-xs">Real-time scans based on high-conviction criteria.</p>
+</header>
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-lg">
+<!-- Top Gainers -->
+<div class="glass-panel rounded-lg overflow-hidden flex flex-col h-full">
+<div class="bg-surface-container-high px-md py-sm border-b border-outline-variant flex justify-between items-center">
+<h2 class="font-mono-label text-mono-label text-secondary uppercase tracking-widest flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">trending_up</span> Top Gainers
+                        </h2>
+<span class="font-mono-label text-[10px] text-on-surface-variant">VOL &gt; 1M</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left data-table font-mono-label text-mono-label">
+<thead class="text-on-surface-variant">
+<tr>
+<th>SYM</th>
+<th class="text-right">LAST</th>
+<th class="text-right">CHG %</th>
+<th class="text-right">VOL</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>NVDA</td><td class="text-right">135.58</td><td class="text-right text-success">+5.2%</td><td class="text-right">45.2M</td></tr>
+<tr><td>AMD</td><td class="text-right">162.10</td><td class="text-right text-success">+4.8%</td><td class="text-right">38.1M</td></tr>
+<tr><td>TSLA</td><td class="text-right">245.89</td><td class="text-right text-success">+3.9%</td><td class="text-right">62.5M</td></tr>
+<tr><td>SMCI</td><td class="text-right">892.45</td><td class="text-right text-success">+3.5%</td><td class="text-right">12.4M</td></tr>
+<tr><td>PLTR</td><td class="text-right">28.90</td><td class="text-right text-success">+3.1%</td><td class="text-right">22.8M</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Top Losers -->
+<div class="glass-panel rounded-lg overflow-hidden flex flex-col h-full">
+<div class="bg-surface-container-high px-md py-sm border-b border-outline-variant flex justify-between items-center">
+<h2 class="font-mono-label text-mono-label text-error uppercase tracking-widest flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">trending_down</span> Top Losers
+                        </h2>
+<span class="font-mono-label text-[10px] text-on-surface-variant">VOL &gt; 1M</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left data-table font-mono-label text-mono-label">
+<thead class="text-on-surface-variant">
+<tr>
+<th>SYM</th>
+<th class="text-right">LAST</th>
+<th class="text-right">CHG %</th>
+<th class="text-right">VOL</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>CRWD</td><td class="text-right">254.12</td><td class="text-right text-danger">-12.4%</td><td class="text-right">55.1M</td></tr>
+<tr><td>PANW</td><td class="text-right">289.45</td><td class="text-right text-danger">-8.2%</td><td class="text-right">18.9M</td></tr>
+<tr><td>SNOW</td><td class="text-right">122.50</td><td class="text-right text-danger">-6.5%</td><td class="text-right">14.2M</td></tr>
+<tr><td>MDB</td><td class="text-right">234.80</td><td class="text-right text-danger">-5.9%</td><td class="text-right">8.7M</td></tr>
+<tr><td>DDOG</td><td class="text-right">108.25</td><td class="text-right text-danger">-4.8%</td><td class="text-right">9.4M</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- 52-Week Highs -->
+<div class="glass-panel rounded-lg overflow-hidden flex flex-col h-full">
+<div class="bg-surface-container-high px-md py-sm border-b border-outline-variant flex justify-between items-center">
+<h2 class="font-mono-label text-mono-label text-on-surface uppercase tracking-widest flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">vertical_align_top</span> 52-Week Highs
+                        </h2>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left data-table font-mono-label text-mono-label">
+<thead class="text-on-surface-variant">
+<tr>
+<th>SYM</th>
+<th class="text-right">LAST</th>
+<th class="text-right">52W HI</th>
+<th class="text-right">% FRM HI</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>META</td><td class="text-right">542.10</td><td class="text-right">542.81</td><td class="text-right text-success">-0.13%</td></tr>
+<tr><td>COST</td><td class="text-right">890.45</td><td class="text-right">892.12</td><td class="text-right text-success">-0.18%</td></tr>
+<tr><td>LLY</td><td class="text-right">954.20</td><td class="text-right">960.00</td><td class="text-right text-success">-0.60%</td></tr>
+<tr><td>WMT</td><td class="text-right">76.85</td><td class="text-right">77.40</td><td class="text-right text-success">-0.71%</td></tr>
+<tr><td>VRT</td><td class="text-right">108.90</td><td class="text-right">110.15</td><td class="text-right text-success">-1.13%</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- 52-Week Lows -->
+<div class="glass-panel rounded-lg overflow-hidden flex flex-col h-full">
+<div class="bg-surface-container-high px-md py-sm border-b border-outline-variant flex justify-between items-center">
+<h2 class="font-mono-label text-mono-label text-on-surface uppercase tracking-widest flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">vertical_align_bottom</span> 52-Week Lows
+                        </h2>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left data-table font-mono-label text-mono-label">
+<thead class="text-on-surface-variant">
+<tr>
+<th>SYM</th>
+<th class="text-right">LAST</th>
+<th class="text-right">52W LO</th>
+<th class="text-right">% FRM LO</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>NKE</td><td class="text-right">72.45</td><td class="text-right">70.12</td><td class="text-right text-danger">+3.32%</td></tr>
+<tr><td>SBUX</td><td class="text-right">75.10</td><td class="text-right">71.55</td><td class="text-right text-danger">+4.96%</td></tr>
+<tr><td>INTC</td><td class="text-right">19.85</td><td class="text-right">18.84</td><td class="text-right text-danger">+5.36%</td></tr>
+<tr><td>BA</td><td class="text-right">158.40</td><td class="text-right">150.15</td><td class="text-right text-danger">+5.49%</td></tr>
+<tr><td>LULU</td><td class="text-right">245.90</td><td class="text-right">226.01</td><td class="text-right text-danger">+8.80%</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Only Buyers (Buy Imbalance) -->
+<div class="glass-panel rounded-lg overflow-hidden flex flex-col h-full">
+<div class="bg-surface-container-high px-md py-sm border-b border-outline-variant flex justify-between items-center">
+<h2 class="font-mono-label text-mono-label text-primary-container uppercase tracking-widest flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">shopping_cart</span> Buy Imbalance
+                        </h2>
+<span class="font-mono-label text-[10px] text-on-surface-variant">ORDER BOOK</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left data-table font-mono-label text-mono-label">
+<thead class="text-on-surface-variant">
+<tr>
+<th>SYM</th>
+<th class="text-right">BID PX</th>
+<th class="text-right">BID QTY</th>
+<th class="text-right">SCORE</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>APP</td><td class="text-right">112.50</td><td class="text-right">45,000</td><td class="text-right text-success">98.5</td></tr>
+<tr><td>ARM</td><td class="text-right">145.20</td><td class="text-right">32,400</td><td class="text-right text-success">94.2</td></tr>
+<tr><td>FSLR</td><td class="text-right">225.80</td><td class="text-right">18,500</td><td class="text-right text-success">91.8</td></tr>
+<tr><td>HIMS</td><td class="text-right">18.45</td><td class="text-right">125,000</td><td class="text-right text-success">89.4</td></tr>
+<tr><td>HOOD</td><td class="text-right">22.10</td><td class="text-right">88,000</td><td class="text-right text-success">85.1</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Only Sellers (Sell Imbalance) -->
+<div class="glass-panel rounded-lg overflow-hidden flex flex-col h-full">
+<div class="bg-surface-container-high px-md py-sm border-b border-outline-variant flex justify-between items-center">
+<h2 class="font-mono-label text-mono-label text-tertiary-container uppercase tracking-widest flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">sell</span> Sell Imbalance
+                        </h2>
+<span class="font-mono-label text-[10px] text-on-surface-variant">ORDER BOOK</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left data-table font-mono-label text-mono-label">
+<thead class="text-on-surface-variant">
+<tr>
+<th>SYM</th>
+<th class="text-right">ASK PX</th>
+<th class="text-right">ASK QTY</th>
+<th class="text-right">SCORE</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>PARA</td><td class="text-right">10.25</td><td class="text-right">150,000</td><td class="text-right text-danger">99.1</td></tr>
+<tr><td>WBD</td><td class="text-right">6.85</td><td class="text-right">210,000</td><td class="text-right text-danger">96.5</td></tr>
+<tr><td>PFE</td><td class="text-right">28.40</td><td class="text-right">85,000</td><td class="text-right text-danger">92.3</td></tr>
+<tr><td>M</td><td class="text-right">14.10</td><td class="text-right">62,000</td><td class="text-right text-danger">88.7</td></tr>
+<tr><td>WBA</td><td class="text-right">11.50</td><td class="text-right">94,000</td><td class="text-right text-danger">86.2</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

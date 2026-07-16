@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "nse": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "C:/Users/naga6/stockapp/trade-vision/dist/index.js"
+      ],
+      "env": {}
+    }
+  }
+}
