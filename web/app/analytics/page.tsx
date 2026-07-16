@@ -12,6 +12,7 @@ import AnalyzeStockPanel from "@/components/AnalyzeStockPanel";
 import ResearchReportPanel from "@/components/ResearchReportPanel";
 import StockImagesPanel from "@/components/StockImagesPanel";
 import IpoPanel from "@/components/IpoPanel";
+import SignalPicker from "@/components/SignalPicker";
 
 export default function AnalyticsPage() {
   const [query, setQuery] = useState("");
@@ -99,6 +100,8 @@ export default function AnalyticsPage() {
           </span>
         </div>
       </div>
+
+      <SignalPicker onPick={run} />
 
       {loading && (
         <div className="text-center text-muted py-5">
