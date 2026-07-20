@@ -12,6 +12,16 @@ function fmt(n: number | null, opts: { money?: boolean; pct?: boolean; d?: numbe
   return n.toLocaleString("en-IN", { maximumFractionDigits: d });
 }
 
+// Yahoo returns margin / return / growth fields as fractions (0.15 = 15%) but
+// dividendYield as a true percent (0.85 = 0.85%). Normalize fractions to a
+// percentage so every "pct" cell reads the way a user expects.
+function pct(n: number | null, opts: { frac?: boolean; d?: number } = {}): string {
+  if (n == null) return "—";
+  const d = opts.d ?? 2;
+  const v = opts.frac === false ? n : n * 100;
+  return `${v.toFixed(d)}%`;
+}
+
 function Metric({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
     <div className="border rounded p-2" style={{ background: "var(--surface-2)", borderColor: "var(--border)" }}>
@@ -35,23 +45,23 @@ export default function FundamentalsView({ f }: { f: Fundamentals }) {
         <Metric label="P/B" value={fmt(f.priceToBook)} />
         <Metric label="EPS (TTM)" value={fmt(f.eps)} />
         <Metric label="Beta" value={fmt(f.beta)} />
-        <Metric label="Dividend Yield" value={fmt(f.dividendYield, { pct: true })} />
-        <Metric label="Profit Margin" value={fmt(f.profitMargins, { pct: true })} />
-        <Metric label="Operating Margin" value={fmt(f.operatingMargins, { pct: true })} />
-        <Metric label="Gross Margin" value={fmt(f.grossMargins, { pct: true })} />
-        <Metric label="ROE" value={fmt(f.returnOnEquity, { pct: true })} />
-        <Metric label="ROA" value={fmt(f.returnOnAssets, { pct: true })} />
+        <Metric label="Dividend Yield" value={pct(f.dividendYield, { frac: false })} />
+        <Metric label="Profit Margin" value={pct(f.profitMargins)} />
+        <Metric label="Operating Margin" value={pct(f.operatingMargins)} />
+        <Metric label="Gross Margin" value={pct(f.grossMargins)} />
+        <Metric label="ROE" value={pct(f.returnOnEquity)} />
+        <Metric label="ROA" value={pct(f.returnOnAssets)} />
         <Metric label="Debt / Equity" value={fmt(f.debtToEquity)} />
         <Metric label="Current Ratio" value={fmt(f.currentRatio)} />
         <Metric label="Total Cash" value={fmt(f.totalCash, { money: true })} />
         <Metric label="Total Debt" value={fmt(f.totalDebt, { money: true })} />
         <Metric
           label="Revenue Growth"
-          value={fmt(f.revenueGrowth, { pct: true })}
+          value={pct(f.revenueGrowth)}
         />
         <Metric
           label="Earnings Growth"
-          value={fmt(f.earningsGrowth, { pct: true })}
+          value={pct(f.earningsGrowth)}
         />
         <Metric label="Free Cash Flow" value={fmt(f.freeCashflow, { money: true })} />
       </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { RemoteTool } from "@/lib/mcpClient";
+import { fetchJson } from "@/lib/fetchJson";
 
 interface PropMeta {
   key: string;
@@ -34,8 +35,7 @@ export default function RemoteMcp() {
   const [callError, setCallError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/remote/list")
-      .then((r) => r.json())
+    fetchJson<any>("/api/remote/list")
       .then((j) => {
         if (j.error) throw new Error(j.error);
         setTools(j.tools);
@@ -90,13 +90,12 @@ export default function RemoteMcp() {
       }
     }
     try {
-      const r = await fetch("/api/remote/call", {
+      const j = await fetchJson<any & { error?: string }>("/api/remote/call", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: selected.name, args }),
       });
-      const j = await r.json();
-      if (!r.ok) throw new Error(j.error || "Call failed");
+      if (j.error) throw new Error(j.error);
       setResult({ display: j.display, isError: j.isError });
     } catch (e) {
       setCallError(e instanceof Error ? e.message : String(e));

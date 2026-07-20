@@ -2,10 +2,11 @@
 
 import { Fragment, useState, type ReactNode } from "react";
 import { useAutoRefresh } from "@/lib/useAutoRefresh";
+import { fetchJson } from "@/lib/fetchJson";
 import type { ResearchReport } from "@/lib/mcp";
 import QuantDisclaimer from "@/components/QuantDisclaimer";
 
-// Minimal, safe line-based markdown renderer (no dangerouslySetInnerHTML).
+// Minimal, safe inline markdown renderer (no dangerouslySetInnerHTML).
 function inline(text: string): ReactNode[] {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
   return parts.map((p, i) =>
@@ -17,43 +18,126 @@ function inline(text: string): ReactNode[] {
   );
 }
 
+function verdictClass(sig: string): string {
+  const s = sig.toUpperCase();
+  if (s.includes("STRONG BUY")) return "vb";
+  if (s === "BUY") return "bull";
+  if (s === "SELL") return "bear";
+  if (s.includes("STRONG SELL")) return "vbr";
+  return "neut";
+}
+
+// Structured renderer: title + ticker pill, section dividers, key/value
+// bullets grouped into a stat grid, and the verdict line as a badge callout.
 function renderMarkdown(md: string): ReactNode {
   const lines = md.split("\n");
   const out: ReactNode[] = [];
-  let bullets: string[] = [];
   let key = 0;
+  let kv: { label: string; value: string }[] = [];
+  let lis: string[] = [];
 
-  const flush = () => {
-    if (bullets.length) {
+  const flushKv = () => {
+    if (kv.length) {
       out.push(
-        <ul key={`ul-${key++}`} className="ps-3 mb-2">
-          {bullets.map((b, i) => (
-            <li key={i}>{inline(b)}</li>
+        <div key={`kv-${key++}`} className="rr-kvgrid">
+          {kv.map((r, i) => (
+            <div key={i} className="rr-stat">
+              <div className="rr-stat-k">{inline(r.label)}</div>
+              <div className="rr-stat-v">{inline(r.value)}</div>
+            </div>
+          ))}
+        </div>,
+      );
+      kv = [];
+    }
+  };
+  const flushLis = () => {
+    if (lis.length) {
+      out.push(
+        <ul key={`ul-${key++}`} className="rr-ul">
+          {lis.map((b, i) => (
+            <li key={i} className="rr-li">
+              {inline(b)}
+            </li>
           ))}
         </ul>,
       );
-      bullets = [];
+      lis = [];
     }
+  };
+  const flush = () => {
+    flushKv();
+    flushLis();
+  };
+
+  const kvMatch = (line: string) => {
+    const m = line.match(/^-\s+\*\*(.+?)\*\*\s*:?\s*(.*)$/);
+    return m ? { label: m[1], value: m[2] } : null;
   };
 
   for (const raw of lines) {
     const line = raw.trimEnd();
     if (line.startsWith("### ")) {
       flush();
-      out.push(<h5 key={`h-${key++}`} style={{ marginTop: 12 }}>{inline(line.slice(4))}</h5>);
+      out.push(
+        <div key={`sub-${key++}`} className="rr-subsection">
+          {inline(line.slice(4))}
+        </div>,
+      );
     } else if (line.startsWith("## ")) {
       flush();
-      out.push(<h4 key={`h-${key++}`} style={{ marginTop: 14 }}>{inline(line.slice(3))}</h4>);
+      out.push(
+        <div key={`sec-${key++}`} className="rr-section">
+          <span>{inline(line.slice(3))}</span>
+        </div>,
+      );
     } else if (line.startsWith("# ")) {
       flush();
-      out.push(<h3 key={`h-${key++}`} style={{ marginTop: 14 }}>{inline(line.slice(2))}</h3>);
+      const t = line.slice(2);
+      const m = t.match(/^(.+?)\s*\(([^)]+)\)$/);
+      out.push(
+        <div key={`t-${key++}`} className="rr-title">
+          <span>{inline(m ? m[1] : t)}</span>
+          {m && <span className="rr-ticker">{m[2]}</span>}
+        </div>,
+      );
     } else if (line.startsWith("- ")) {
-      bullets.push(line.slice(2));
+      const row = kvMatch(line);
+      if (row) {
+        flushLis();
+        kv.push(row);
+      } else {
+        flushKv();
+        lis.push(line.slice(2));
+      }
     } else if (line === "") {
       flush();
+    } else if (line.startsWith("**")) {
+      flush();
+      const m = line.match(/^\*\*(.+?)\*\*\s*(.*)$/);
+      if (m) {
+        out.push(
+          <div key={`v-${key++}`} className="rr-verdict">
+            <span className={`verdict-badge ${verdictClass(m[1])}`}>
+              {m[1]}
+            </span>
+            <span className="rr-verdict-text">{inline(m[2])}</span>
+          </div>,
+        );
+      } else {
+        out.push(
+          <p key={`p-${key++}`} className="rr-p">
+            {inline(line)}
+          </p>,
+        );
+      }
     } else {
       flush();
-      out.push(<p key={`p-${key++}`} style={{ marginBottom: 8 }}>{inline(line)}</p>);
+      out.push(
+        <p key={`p-${key++}`} className="rr-p">
+          {inline(line)}
+        </p>,
+      );
     }
   }
   flush();
@@ -73,8 +157,7 @@ export default function ResearchReportPanel({
   useAutoRefresh(
     () => {
       if (data) return;
-      fetch(`/api/research?symbol=${encodeURIComponent(symbol)}`)
-        .then((r) => r.json())
+      fetchJson<any>(`/api/research?symbol=${encodeURIComponent(symbol)}`)
         .then((j) => {
           setD(j.error ? null : j);
           setLoading(false);
@@ -112,9 +195,10 @@ export default function ResearchReportPanel({
   return (
     <div className="panel" style={{ padding: 16 }}>
       <div className="panel-title">
-        <i className="bi bi-file-earmark-text" /> Research Report · {d.symbol}
+        <i className="bi bi-file-earmark-text" /> Research Report
+        <span className="sub">AI-synthesised · not advice</span>
       </div>
-      <div style={{ fontSize: "0.9rem", lineHeight: 1.55 }}>{renderMarkdown(d.report)}</div>
+      <div className="rr-body">{renderMarkdown(d.report)}</div>
       <QuantDisclaimer />
     </div>
   );

@@ -2,13 +2,22 @@ import { mkdirSync, writeFileSync } from "fs";
 import { join } from "path";
 import { validateSymbol, fetchDailyBars, round } from "../quant/util.js";
 import { getOptionChain } from "../options/optionChain.js";
-const W = 820;
-const H = 360;
+const W = 680;
+const H = 300;
 const M = { top: 24, right: 16, bottom: 28, left: 56 };
+// Per-symbol frame overrides for symbols whose charts render too large in the
+// panel (e.g. AARTIIND.NS). Falls back to the defaults above.
+const FRAME_OVERRIDES = {
+    AARTIIND: { w: 520, h: 230 },
+};
+function frameFor(ticker) {
+    const o = FRAME_OVERRIDES[ticker.replace(/\.(NS|BO)$/, "")];
+    return { W: o?.w ?? W, H: o?.h ?? H };
+}
 function esc(n) {
     return Number.isFinite(n) ? String(round(n, 2)) : "";
 }
-function candlestickSvg(bars) {
+function candlestickSvg(bars, W, H) {
     const plotW = W - M.left - M.right;
     const plotH = H - M.top - M.bottom;
     const lo = Math.min(...bars.map((b) => b.low));
@@ -39,7 +48,7 @@ function candlestickSvg(bars) {
     body += `<text x="${M.left}" y="16" fill="#cdd6e8" font-size="13">Candlestick · last ${bars.length} sessions</text>`;
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${body}</svg>`;
 }
-function ivSurfaceSvg(smile, underlying) {
+function ivSurfaceSvg(smile, underlying, W, H) {
     const pts = smile.filter((p) => p.iv != null);
     const plotW = W - M.left - M.right;
     const plotH = H - M.top - M.bottom;
@@ -71,7 +80,7 @@ function ivSurfaceSvg(smile, underlying) {
     body += `<text x="${M.left}" y="16" fill="#cdd6e8" font-size="13">Implied volatility by strike</text>`;
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${body}</svg>`;
 }
-function optionsFlowSvg(strikes) {
+function optionsFlowSvg(strikes, W, H) {
     const plotW = W - M.left - M.right;
     const plotH = H - M.top - M.bottom;
     if (!strikes.length) {
@@ -141,15 +150,16 @@ export async function generateStockImages(args) {
     }
     const outDir = join(process.cwd(), "charts");
     mkdirSync(outDir, { recursive: true });
+    const { W: fw, H: fh } = frameFor(ticker);
     const charts = [];
     if (cbars.length >= 2) {
-        const svg = candlestickSvg(cbars);
+        const svg = candlestickSvg(cbars, fw, fh);
         const path = join(outDir, `${base}_candlestick.svg`);
         writeFileSync(path, svg, "utf8");
         charts.push({ type: "candlestick", title: "Candlestick price", path, svg });
     }
     {
-        const svg = ivSurfaceSvg(smile, underlying);
+        const svg = ivSurfaceSvg(smile, underlying, fw, fh);
         const path = join(outDir, `${base}_iv_surface.svg`);
         writeFileSync(path, svg, "utf8");
         charts.push({ type: "iv_surface", title: "Implied volatility by strike", path, svg });
@@ -159,7 +169,7 @@ export async function generateStockImages(args) {
             strikePrice: s.strikePrice,
             ce: s.ce ? { openInterest: s.ce.openInterest } : null,
             pe: s.pe ? { openInterest: s.pe.openInterest } : null,
-        })));
+        })), fw, fh);
         const path = join(outDir, `${base}_options_flow.svg`);
         writeFileSync(path, svg, "utf8");
         charts.push({ type: "options_flow", title: "Options flow (OI by strike)", path, svg });

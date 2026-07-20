@@ -26,6 +26,12 @@ export interface TechnicalSummary {
 export interface Technical {
   symbol: string;
   price: number;
+  /** Price at which the current BUY/SELL/NEUTRAL verdict first triggered. */
+  triggerPrice: number;
+  /** ISO date (YYYY-MM-DD) of the bar where the verdict triggered, if known. */
+  triggerDate?: string;
+  /** Confluence-based trade plan: where to buy/sell, stop and target. */
+  confluence: ConfluencePlan;
   summary: TechnicalSummary;
   oscillators: TechSignal[];
   movingAverages: TechSignal[];
@@ -928,41 +934,41 @@ function summaryLabel(score: number): TechnicalSummary["label"] {
 const f2 = (n: number) => (Number.isNaN(n) ? "—" : n.toFixed(2));
 const fP = (n: number) => (Number.isNaN(n) ? "—" : `₹${n.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`);
 
-// ---- tool -----------------------------------------------------------------
+// How far back (in bars) to search for the bar where the current verdict first
+// triggered. Bounds the backward walk so the scan stays fast even on long
+// histories.
+const MAX_TRIGGER_LOOKBACK = 180;
 
-export async function getTechnicalAnalysis(args: TechnicalArgs): Promise<Technical> {
-  const raw = (args.symbol ?? "").trim();
-  if (!raw) throw new Error("symbol is required");
-  const upper = raw.toUpperCase();
-  const ticker = /\.[A-Z]{1,3}$/.test(upper) ? upper : `${upper}.NS`;
-  if (!SYMBOL_RE.test(ticker.replace(".NS", "").replace(".BO", ""))) {
-    throw new Error(`invalid symbol: ${JSON.stringify(raw)}`);
+// Recomputes the full oscillator + moving-average verdict for a trailing window
+// of price data ending at `price` (the close of the last bar in the slice).
+// Used for the live verdict and to walk backwards and locate the bar where the
+// current BUY/SELL verdict first triggered.
+function scoreSignal(
+  closes: number[],
+  highs: number[],
+  lows: number[],
+  price: number,
+): {
+  oscillators: TechSignal[];
+  movingAverages: TechSignal[];
+  buy: number;
+  sell: number;
+  neutral: number;
+  score: number;
+  label: TechnicalSummary["label"];
+} {
+  if (closes.length < 30) {
+    return {
+      oscillators: [],
+      movingAverages: [],
+      buy: 0,
+      sell: 0,
+      neutral: 0,
+      score: 0,
+      label: "NEUTRAL",
+    };
   }
 
-  const cached = techCache.get(ticker);
-  if (cached && Date.now() - cached.at < TECH_TTL_MS) return cached.data;
-
-  const now = Math.floor(Date.now() / 1000);
-  const p1 = now - 400 * 24 * 3600;
-  const r = await yahooFinance.chart(ticker, {
-    period1: p1,
-    period2: now,
-    interval: "1d",
-  });
-
-  const bars = (r?.quotes ?? []).filter(
-    (q: any) => q && typeof q.close === "number" && q.high != null && q.low != null
-  );
-  if (bars.length < 30) {
-    throw new Error(`Not enough historical data for ${ticker}`);
-  }
-
-  const closes = bars.map((b: any) => b.close as number);
-  const highs = bars.map((b: any) => b.high as number);
-  const lows = bars.map((b: any) => b.low as number);
-  const price = closes[closes.length - 1];
-
-  // Oscillators
   const rsiV = rsi(closes);
   const stoch = stochastic(highs, lows, closes);
   const macdV = macd(closes);
@@ -1000,7 +1006,6 @@ export async function getTechnicalAnalysis(args: TechnicalArgs): Promise<Technic
     { name: "Williams %R (14)", value: f2(wrV), signal: band(wrV, -80, -20) },
   ];
 
-  // Moving averages (price vs MA)
   const maPeriods = [10, 20, 50, 100, 200];
   const movingAverages: TechSignal[] = [];
   for (const p of maPeriods) {
@@ -1025,6 +1030,305 @@ export async function getTechnicalAnalysis(args: TechnicalArgs): Promise<Technic
   const neutral = total - buy - sell;
   const score = all.reduce((a, s) => a + scoreOf(s.signal), 0) / total;
 
+  return {
+    oscillators,
+    movingAverages,
+    buy,
+    sell,
+    neutral,
+    score,
+    label: summaryLabel(score),
+  };
+}
+
+// ===========================================================================
+// Confluence-level engine.
+//
+// No single indicator gives an exact buy/sell price. Instead we gather
+// candidate levels from six *independent* tools — swing pivots, round
+// numbers, Fibonacci retracements/extensions, moving averages, VWAP and the
+// volume-profile POC — then cluster the candidates that land near each other.
+// A cluster's `strength` is how many distinct tools agree on that price; the
+// strongest cluster below the current price is the buy zone, the strongest
+// above is the sell zone. Stops/targets come from ATR and the opposite zone.
+// ===========================================================================
+
+export type ConfluenceTool = "Pivot" | "Round" | "Fib" | "MA" | "VWAP" | "VolProfile";
+
+export interface ConfluenceLevel {
+  /** Cluster centre (average of the agreeing candidate prices). */
+  price: number;
+  low: number;
+  high: number;
+  /** Number of independent tools that agree on this price (1..6). */
+  strength: number;
+  sources: ConfluenceTool[];
+}
+
+export interface ConfluencePlan {
+  bias: "BUY" | "SELL" | "NEUTRAL";
+  buyZone: ConfluenceLevel | null;
+  sellZone: ConfluenceLevel | null;
+  longStop: number | null;
+  longTarget: number | null;
+  /** Reward:risk ratio for the long setup (target vs stop from entry). */
+  longRRR: number | null;
+  shortStop: number | null;
+  shortTarget: number | null;
+  shortRRR: number | null;
+  /** Top confluence clusters, strongest first, for display. */
+  levels: ConfluenceLevel[];
+}
+
+function roundNumStep(p: number): number {
+  if (p < 50) return 1;
+  if (p < 100) return 2;
+  if (p < 500) return 5;
+  if (p < 1000) return 10;
+  if (p < 5000) return 25;
+  return 100;
+}
+
+interface RawCluster {
+  price: number;
+  low: number;
+  high: number;
+  sources: ConfluenceTool[];
+  count: number;
+}
+
+export function computeConfluence(
+  closes: number[],
+  highs: number[],
+  lows: number[],
+  vols: number[],
+  price: number,
+  atr: number,
+  bias: ConfluencePlan["bias"],
+): ConfluencePlan {
+  const empty: ConfluencePlan = {
+    bias,
+    buyZone: null,
+    sellZone: null,
+    longStop: null,
+    longTarget: null,
+    longRRR: null,
+    shortStop: null,
+    shortTarget: null,
+    shortRRR: null,
+    levels: [],
+  };
+  if (closes.length < 30 || !Number.isFinite(price) || !(atr > 0)) return empty;
+
+  const n = closes.length;
+  const wn = Math.min(n, 120);
+  const c0 = n - wn;
+  const cCloses = closes.slice(c0);
+  const cHighs = highs.slice(c0);
+  const cLows = lows.slice(c0);
+  const cVols = vols.slice(c0);
+
+  const cands: { price: number; tool: ConfluenceTool }[] = [];
+
+  // 1. Swing pivots (left=right=3) over the window.
+  const { hi: pHi, lo: pLo } = findPivots(cHighs, cLows, 3, 3);
+  for (const i of pLo) cands.push({ price: cLows[i], tool: "Pivot" });
+  for (const i of pHi) cands.push({ price: cHighs[i], tool: "Pivot" });
+
+  // 2. Round numbers nearest to the current price.
+  const step = roundNumStep(price);
+  cands.push({ price: Math.floor(price / step) * step, tool: "Round" });
+  cands.push({ price: Math.ceil(price / step) * step, tool: "Round" });
+
+  // 3. Fibonacci retracements + extensions of the window's range.
+  const hi = Math.max(...cHighs);
+  const lo = Math.min(...cLows);
+  const rng = hi - lo || price * 0.01;
+  for (const r of [0, 0.236, 0.382, 0.5, 0.618, 0.786, 1]) {
+    cands.push({ price: hi - rng * r, tool: "Fib" });
+  }
+  for (const e of [0.272, 0.618, 1.0, 1.618]) {
+    cands.push({ price: hi + rng * e, tool: "Fib" });
+  }
+
+  // 4. Moving averages (SMA + EMA) as dynamic S/R.
+  for (const p of [20, 50, 100, 200]) {
+    cands.push({ price: sma(cCloses, p), tool: "MA" });
+    cands.push({ price: ema(cCloses, p), tool: "MA" });
+  }
+
+  // 5. Cumulative VWAP over the window (daily-bar proxy).
+  let cumPV = 0;
+  let cumV = 0;
+  for (let i = 0; i < wn; i++) {
+    const tp = (cHighs[i] + cLows[i] + cCloses[i]) / 3;
+    cumPV += tp * (cVols[i] || 0);
+    cumV += cVols[i] || 0;
+  }
+  if (cumV > 0) cands.push({ price: cumPV / cumV, tool: "VWAP" });
+
+  // 6. Volume-profile POC (price bin carrying the most volume).
+  const bins = 20;
+  const bMin = Math.min(...cCloses);
+  const bMax = Math.max(...cCloses);
+  const bW = bMax - bMin || price * 0.01;
+  const bVol = new Array(bins).fill(0);
+  for (let i = 0; i < wn; i++) {
+    let b = Math.floor((cCloses[i] - bMin) / bW);
+    if (b < 0) b = 0;
+    if (b >= bins) b = bins - 1;
+    bVol[b] += cVols[i] || 0;
+  }
+  let pocB = 0;
+  for (let b = 1; b < bins; b++) if (bVol[b] > bVol[pocB]) pocB = b;
+  cands.push({ price: bMin + (pocB + 0.5) * bW, tool: "VolProfile" });
+
+  // ---- cluster the candidates that land near each other ----------------
+  const tol = Math.max(price * 0.004, atr * 0.5);
+  const sorted = cands
+    .filter((c) => Number.isFinite(c.price))
+    .sort((a, b) => a.price - b.price);
+
+  const raw: RawCluster[] = [];
+  for (const c of sorted) {
+    const last = raw[raw.length - 1];
+    if (last && c.price <= last.high + tol) {
+      last.high = Math.max(last.high, c.price);
+      last.low = Math.min(last.low, c.price);
+      last.price = (last.price * last.count + c.price) / (last.count + 1);
+      last.count++;
+      if (!last.sources.includes(c.tool)) last.sources.push(c.tool);
+    } else {
+      raw.push({ price: c.price, low: c.price, high: c.price, sources: [c.tool], count: 1 });
+    }
+  }
+
+  const levels: ConfluenceLevel[] = raw.map((r) => ({
+    price: r.price,
+    low: r.low,
+    high: r.high,
+    strength: r.sources.length,
+    sources: r.sources,
+  }));
+
+  // ---- pick the strongest zones below / above the current price --------
+  const below = levels
+    .filter((l) => l.high < price)
+    .sort((a, b) => b.strength - a.strength || b.high - a.high);
+  const above = levels
+    .filter((l) => l.low > price)
+    .sort((a, b) => b.strength - a.strength || a.low - b.low);
+  const buyZone = below[0] ?? null;
+  const sellZone = above[0] ?? null;
+
+  // ---- derive stops / targets from ATR and the opposite zone -----------
+  let longStop: number | null = null;
+  let longTarget: number | null = null;
+  let longRRR: number | null = null;
+  if (buyZone) {
+    longStop = buyZone.low - atr;
+    longTarget = sellZone ? sellZone.price : price + 2 * atr;
+    const risk = price - longStop;
+    const reward = longTarget - price;
+    longRRR = risk > 0 ? reward / risk : null;
+  }
+  let shortStop: number | null = null;
+  let shortTarget: number | null = null;
+  let shortRRR: number | null = null;
+  if (sellZone) {
+    shortStop = sellZone.high + atr;
+    shortTarget = buyZone ? buyZone.price : price - 2 * atr;
+    const risk = shortStop - price;
+    const reward = price - shortTarget;
+    shortRRR = risk > 0 ? reward / risk : null;
+  }
+
+  const ranked = levels
+    .slice()
+    .sort(
+      (a, b) =>
+        b.strength - a.strength ||
+        Math.abs(a.price - price) - Math.abs(b.price - price),
+    );
+
+  return {
+    bias,
+    buyZone,
+    sellZone,
+    longStop,
+    longTarget,
+    longRRR,
+    shortStop,
+    shortTarget,
+    shortRRR,
+    levels: ranked.slice(0, 10),
+  };
+}
+
+// ---- tool -----------------------------------------------------------------
+
+export async function getTechnicalAnalysis(args: TechnicalArgs): Promise<Technical> {
+  const raw = (args.symbol ?? "").trim();
+  if (!raw) throw new Error("symbol is required");
+  const upper = raw.toUpperCase();
+  const ticker = /\.[A-Z]{1,3}$/.test(upper) ? upper : `${upper}.NS`;
+  if (!SYMBOL_RE.test(ticker.replace(".NS", "").replace(".BO", ""))) {
+    throw new Error(`invalid symbol: ${JSON.stringify(raw)}`);
+  }
+
+  const cached = techCache.get(ticker);
+  if (cached && Date.now() - cached.at < TECH_TTL_MS) return cached.data;
+
+  const now = Math.floor(Date.now() / 1000);
+  const p1 = now - 400 * 24 * 3600;
+  const r = await yahooFinance.chart(ticker, {
+    period1: p1,
+    period2: now,
+    interval: "1d",
+  });
+
+  const bars = (r?.quotes ?? []).filter(
+    (q: any) => q && typeof q.close === "number" && q.high != null && q.low != null
+  );
+  if (bars.length < 30) {
+    throw new Error(`Not enough historical data for ${ticker}`);
+  }
+
+  const closes = bars.map((b: any) => b.close as number);
+  const highs = bars.map((b: any) => b.high as number);
+  const lows = bars.map((b: any) => b.low as number);
+  const vols = bars.map((b: any) => (b.volume ?? 0) as number);
+  const price = closes[closes.length - 1];
+
+  // Oscillators + moving averages + verdict for the full series.
+  const sig = scoreSignal(closes, highs, lows, price);
+
+  // Walk backwards from the latest bar to find the bar where the current
+  // verdict first triggered (the last bar still carrying a *different* verdict
+  // means the trigger is the bar right after it).
+  let triggerIndex = closes.length - 1;
+  const minIdx = Math.max(29, closes.length - 1 - MAX_TRIGGER_LOOKBACK);
+  for (let i = closes.length - 2; i >= minIdx; i--) {
+    const s = scoreSignal(
+      closes.slice(0, i + 1),
+      highs.slice(0, i + 1),
+      lows.slice(0, i + 1),
+      closes[i],
+    );
+    if (s.label !== sig.label) {
+      triggerIndex = i + 1;
+      break;
+    }
+  }
+  const triggerPrice = closes[triggerIndex];
+  const triggerDateRaw = (bars[triggerIndex] as { date?: Date | string } | undefined)?.date;
+  const triggerDate =
+    triggerDateRaw != null
+      ? triggerDateRaw instanceof Date
+        ? triggerDateRaw.toISOString().slice(0, 10)
+        : String(triggerDateRaw).slice(0, 10)
+      : undefined;
+
   const volatility = {
     atr: atr(highs, lows, closes),
     bbWidth: bollingerWidth(closes),
@@ -1032,12 +1336,25 @@ export async function getTechnicalAnalysis(args: TechnicalArgs): Promise<Technic
   };
   const patterns = detectPatterns(bars);
 
+  const confluence = computeConfluence(
+    closes,
+    highs,
+    lows,
+    vols,
+    price,
+    volatility.atr,
+    sig.label.includes("BUY") ? "BUY" : sig.label.includes("SELL") ? "SELL" : "NEUTRAL",
+  );
+
   const data: Technical = {
     symbol: ticker,
     price,
-    summary: { label: summaryLabel(score), score, buy, neutral, sell },
-    oscillators,
-    movingAverages,
+    triggerPrice,
+    triggerDate,
+    confluence,
+    summary: { label: sig.label, score: sig.score, buy: sig.buy, neutral: sig.neutral, sell: sig.sell },
+    oscillators: sig.oscillators,
+    movingAverages: sig.movingAverages,
     volatility,
     patterns,
     generatedAt: new Date().toISOString(),

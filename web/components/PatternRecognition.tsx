@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAutoRefresh } from "@/lib/useAutoRefresh";
+import { fetchJson } from "@/lib/fetchJson";
 import type { PatternAnalysis, DetectedPattern, PatternHorizon } from "@/lib/mcp";
 
 const typeColor = (t: string) =>
@@ -96,8 +97,7 @@ export default function PatternRecognition({ symbol }: { symbol: string }) {
 
   useAutoRefresh(
     () => {
-      fetch(`/api/pattern-analysis?symbol=${encodeURIComponent(symbol)}`)
-        .then((r) => r.json())
+      fetchJson<any>(`/api/pattern-analysis?symbol=${encodeURIComponent(symbol)}`)
         .then((j) => {
           setData(Array.isArray(j) ? j : null);
           setLoading(false);

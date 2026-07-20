@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAutoRefresh } from "@/lib/useAutoRefresh";
+import { fetchJson } from "@/lib/fetchJson";
 import type { Technical } from "@/lib/mcp";
 import { fmt, fmtPct } from "@/lib/format";
 
@@ -20,8 +21,7 @@ export default function VolatilityPanel({ symbol }: { symbol: string }) {
 
   useAutoRefresh(
     () => {
-      fetch(`/api/technical?symbol=${encodeURIComponent(symbol)}`)
-        .then((r) => r.json())
+      fetchJson<any>(`/api/technical?symbol=${encodeURIComponent(symbol)}`)
         .then((j) => {
           setV(j.volatility ?? null);
           setLoading(false);

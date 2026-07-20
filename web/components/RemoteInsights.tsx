@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { fetchJson } from "@/lib/fetchJson";
 
 interface ToolInfo {
   name: string;
@@ -74,8 +75,7 @@ export default function RemoteInsights({ symbol }: { symbol: string }) {
   const [custom, setCustom] = useState<CallResult | "loading" | null>(null);
 
   useEffect(() => {
-    fetch("/api/remote/list")
-      .then((r) => r.json())
+    fetchJson<any>("/api/remote/list")
       .then((j) => setTools(j.tools || []))
       .catch(() => {});
   }, []);
@@ -87,11 +87,11 @@ export default function RemoteInsights({ symbol }: { symbol: string }) {
     AUT0.forEach(async (name) => {
       setResults((prev) => ({ ...prev, [name]: "loading" }));
       try {
-        const r = await fetch("/api/remote/call", {
+        const r = await fetchJson<any>("/api/remote/call", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name, args: { symbol: s } }),
-        }).then((r) => r.json());
+        });
         if (alive) setResults((prev) => ({ ...prev, [name]: r }));
       } catch (e) {
         if (alive)
@@ -117,11 +117,11 @@ export default function RemoteInsights({ symbol }: { symbol: string }) {
     }
     setCustom("loading");
     try {
-      const r = await fetch("/api/remote/call", {
+      const r = await fetchJson<any>("/api/remote/call", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: selected, args: parsed }),
-      }).then((r) => r.json());
+      });
       setCustom(r);
     } catch (e) {
       setCustom({ isError: true, display: "", error: String(e) });

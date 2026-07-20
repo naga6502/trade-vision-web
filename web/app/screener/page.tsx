@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useAutoRefresh } from "@/lib/useAutoRefresh";
 import type { ScreenerScreen } from "@/lib/marketData";
-import ScreenerScreenCard from "@/components/ScreenerScreenCard";
+import ScreenerSheet from "@/components/ScreenerSheet";
 import { SymCell } from "@/components/ScreenerTable";
 import { fmtPct, clsx } from "@/lib/format";
+import { downloadCsv } from "@/lib/exportCsv";
+import { fetchJson } from "@/lib/fetchJson";
 
 interface PortfolioPick {
   symbol: string;
@@ -47,14 +49,13 @@ export default function ScreenersPage() {
   const [data, setData] = useState<ScreenerData | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [active, setActive] = useState<string>("all");
+  const [active, setActive] = useState<string>("");
   const [deleted, setDeleted] = useState<Set<string>>(new Set());
 
   useAutoRefresh(() => {
     (async () => {
       try {
-        const r = await fetch("/api/screener").then((x) => x.json());
-        if (r.error) throw new Error(r.error);
+        const r = await fetchJson<ScreenerData>("/api/screener");
         setData(r);
         setErr(null);
         setLoading(false);
@@ -67,16 +68,57 @@ export default function ScreenersPage() {
 
   const screens = (data?.screens ?? []).filter((s) => !deleted.has(s.name));
   const totalCandidates = screens.reduce((a, s) => a + s.results.length, 0);
-  const visible = active === "all" ? screens : screens.filter((s) => s.name === active);
+  // Each tab is one screen; the active tab falls back to the first screen
+  // once data arrives (and to the next surviving screen after a delete).
+  const activeScreen =
+    screens.find((s) => s.name === active) ?? screens[0] ?? null;
 
-  const tabs = [
-    { key: "all", label: "All", icon: "bi-grid-3x3-gap" },
-    ...screens.map((s) => ({
-      key: s.name,
-      label: titleCase(s.name),
-      icon: SCREEN_ICONS[s.name] ?? "bi-funnel",
-    })),
-  ];
+  // Downloads one spreadsheet (CSV) per tab — each file holds that tab's
+  // stocks, sorted by score. Browsers may prompt once to allow multiple
+  // downloads from this site.
+  const exportCsv = () => {
+    if (screens.length === 0) return;
+    const stamp = new Date().toISOString().slice(0, 10);
+    const clean = (sym: string) => sym.replace(/\.(NS|BO)$/, "");
+    for (const s of screens) {
+      if (s.results.length === 0) continue;
+      const header = [
+        "Symbol", "Name", "Price", "Chg%", "Score", "Risk", "Trend",
+        "Momentum", "Volume", "Pattern", "RSI", "ADX", "EMA20", "EMA50",
+        "EMA200", "ATR", "VolRatio", "Reason",
+      ];
+      const rows: (string | number | null)[][] = [header];
+      for (const r of [...s.results].sort((a, b) => b.score - a.score)) {
+        rows.push([
+          clean(r.symbol),
+          r.name ?? "",
+          r.price,
+          r.changePct,
+          r.score,
+          r.risk,
+          r.trend,
+          r.momentum,
+          r.volume,
+          r.pattern,
+          r.indicators.rsi ?? null,
+          r.indicators.adx ?? null,
+          r.indicators.ema20 ?? null,
+          r.indicators.ema50 ?? null,
+          r.indicators.ema200 ?? null,
+          r.indicators.atr ?? null,
+          r.indicators.volRatio ?? null,
+          r.reason,
+        ]);
+      }
+      downloadCsv(`screener-${s.name}-${stamp}.csv`, rows);
+    }
+  };
+
+  const tabs = screens.map((s) => ({
+    key: s.name,
+    label: titleCase(s.name),
+    icon: SCREEN_ICONS[s.name] ?? "bi-funnel",
+  }));
 
   return (
     <div>
@@ -87,8 +129,8 @@ export default function ScreenersPage() {
           <span className="pill ms-2">{totalCandidates} candidates · {data.universeSize} scanned</span>
         )}
         {data && !loading && (
-          <button className="btn-del-all ms-2" onClick={() => { setActive("all"); setDeleted(new Set(screens.map((s) => s.name))); }}>
-            <i className="bi bi-trash3 me-1" /> Delete ALL
+          <button className="btn-export ms-2" onClick={exportCsv}>
+            <i className="bi bi-download me-1" /> Export CSV
           </button>
         )}
         {deleted.size > 0 && (
@@ -130,28 +172,19 @@ export default function ScreenersPage() {
             ))}
           </div>
 
-          {active === "all" ? (
-            <div className="screener-grid">
-              {visible.map((s) => (
-                <ScreenerScreenCard
-                  key={s.name}
-                  screen={s}
-                  icon={SCREEN_ICONS[s.name] ?? "bi-funnel"}
-                  onDelete={() => { if (active === s.name) setActive("all"); setDeleted((d) => new Set(d).add(s.name)); }}
-                />
-              ))}
-            </div>
-          ) : (
-            visible.map((s) => (
-              <ScreenerScreenCard
-                key={s.name}
-                screen={s}
-                icon={SCREEN_ICONS[s.name] ?? "bi-funnel"}
-                full
-                onDelete={() => setDeleted((d) => new Set(d).add(s.name))}
-              />
-            ))
-          )}
+          {activeScreen ? (
+            <ScreenerSheet
+              key={activeScreen.name}
+              results={activeScreen.results}
+              onDelete={() => {
+                setDeleted((d) => new Set(d).add(activeScreen.name));
+                const next = screens.find(
+                  (s) => s.name !== activeScreen.name,
+                );
+                setActive(next?.name ?? "");
+              }}
+            />
+          ) : null}
 
           {screens.length === 0 && (
             <div className="empty-note mt-3">

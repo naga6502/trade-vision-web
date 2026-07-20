@@ -1,22 +1,41 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import type {
   AnalyzeStock,
   ResearchReport,
   StockImagesResult,
   IpoWithSignal,
 } from "@/lib/mcp";
-import { STOCKS, resolveSymbol } from "@/lib/stocks";
+import { resolveSymbol } from "@/lib/stocks";
+import {
+  getSelectedSymbol,
+  setSelectedSymbol,
+  subscribeSelected,
+} from "@/lib/selectedStore";
 import AnalyzeStockPanel from "@/components/AnalyzeStockPanel";
 import ResearchReportPanel from "@/components/ResearchReportPanel";
 import StockImagesPanel from "@/components/StockImagesPanel";
 import IpoPanel from "@/components/IpoPanel";
 import SignalPicker from "@/components/SignalPicker";
+import WatchlistPanel from "@/components/WatchlistPanel";
+import { fetchJson } from "@/lib/fetchJson";
 
 export default function AnalyticsPage() {
-  const [query, setQuery] = useState("");
-  const [symbol, setSymbol] = useState("");
+  // Driven by the top search bar / global selected-symbol store rather than a
+  // local search box — searching any stock from the header loads it here.
+  // useSyncExternalStore reads getSelectedSymbol, which hydrates from
+  // localStorage. That value is unavailable during SSR, so the server and the
+  // first client render must agree on an empty symbol; read the store only
+  // after mount to avoid a hydration text mismatch.
+  const storeSymbol = useSyncExternalStore(
+    subscribeSelected,
+    getSelectedSymbol,
+    getSelectedSymbol,
+  );
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const symbol = mounted ? storeSymbol : "";
   const [analyze, setAnalyze] = useState<AnalyzeStock | null>(null);
   const [research, setResearch] = useState<ResearchReport | null>(null);
   const [images, setImages] = useState<StockImagesResult | null>(null);
@@ -27,17 +46,20 @@ export default function AnalyticsPage() {
   const run = (raw: string) => {
     const s = resolveSymbol(raw);
     if (!s) return;
-    setSymbol(s);
-    setQuery(s);
+    setSelectedSymbol(s);
+  };
+
+  useEffect(() => {
+    if (!symbol) return;
     setLoading(true);
     setErr(null);
     Promise.all([
-      fetch(`/api/analyze?symbol=${encodeURIComponent(s)}`).then((r) => r.json()),
-      fetch(`/api/research?symbol=${encodeURIComponent(s)}`).then((r) => r.json()),
-      fetch(`/api/stock-images?symbol=${encodeURIComponent(s)}`).then((r) => r.json()),
-      fetch(`/api/ipo/details?symbol=${encodeURIComponent(s)}`)
-        .then((r) => r.json())
-        .catch(() => ({ ipo: null })),
+      fetchJson<any>(`/api/analyze?symbol=${encodeURIComponent(symbol)}`),
+      fetchJson<any>(`/api/research?symbol=${encodeURIComponent(symbol)}`),
+      fetchJson<any>(`/api/stock-images?symbol=${encodeURIComponent(symbol)}`),
+      fetchJson<any>(`/api/ipo/details?symbol=${encodeURIComponent(symbol)}`).catch(
+        () => ({ ipo: null }),
+      ),
     ])
       .then(([a, r, i, ip]) => {
         setAnalyze(a.error ? null : a);
@@ -51,9 +73,7 @@ export default function AnalyticsPage() {
         setErr(e instanceof Error ? e.message : String(e));
         setLoading(false);
       });
-  };
-
-  const onSearch = () => run(query);
+  }, [symbol]);
 
   const hasData = analyze || research || images || ipo;
 
@@ -64,44 +84,9 @@ export default function AnalyticsPage() {
         <span className="pill accent ms-1">AI · Options · Monte Carlo</span>
       </div>
 
-      <div className="panel mb-3" style={{ padding: 14 }}>
-        <div className="d-flex flex-wrap gap-2 align-items-center">
-          <input
-            className="form-control"
-            style={{ maxWidth: 320 }}
-            list="analytics-stock-list"
-            placeholder="Search stock by name or symbol (e.g. RELIANCE)"
-            value={query}
-            onChange={(e) => setQuery(e.target.value.toUpperCase())}
-            onKeyDown={(e) => e.key === "Enter" && onSearch()}
-            autoComplete="off"
-          />
-          <datalist id="analytics-stock-list">
-            {STOCKS.map((s) => (
-              <option key={s.symbol} value={s.symbol}>
-                {s.name}
-              </option>
-            ))}
-          </datalist>
-          <button
-            className="btn btn-sm btn-accent"
-            onClick={onSearch}
-            disabled={loading || !query.trim()}
-          >
-            {loading ? (
-              <span className="spinner-border spinner-border-sm" />
-            ) : (
-              "Search Stock"
-            )}
-          </button>
-          <span className="muted-text small">
-            Aggregates AI prediction, IV radar, option pressure, Monte Carlo &amp;
-            equity curves into one verdict.
-          </span>
-        </div>
-      </div>
-
       <SignalPicker onPick={run} />
+
+      <WatchlistPanel onPick={run} />
 
       {loading && (
         <div className="text-center text-muted py-5">
@@ -118,13 +103,20 @@ export default function AnalyticsPage() {
 
       {!loading && !err && !hasData && (
         <div className="empty-note text-center py-5">
-          <i className="bi bi-clipboard2-pulse fs-2 d-block mb-2" />
-          Pick a stock from the list above and click <strong>Search Stock</strong> to
-          load its analytics.
+          <i className="bi bi-search fs-2 d-block mb-2" />
+          {symbol ? (
+            <>No analytics data available for {symbol}.</>
+          ) : (
+            <>
+              Search a stock from the top bar (e.g. RELIANCE) to load its AI
+              prediction, IV radar, option pressure, Monte Carlo &amp; equity
+              curves.
+            </>
+          )}
         </div>
       )}
 
-      {!loading && !err && hasData && (
+      {!loading && !err && symbol && hasData && (
         <div className="d-flex flex-column gap-3">
           <AnalyzeStockPanel symbol={symbol} data={analyze} />
           <IpoPanel data={ipo} />

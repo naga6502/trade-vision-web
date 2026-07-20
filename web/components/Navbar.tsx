@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { fetchJson } from "@/lib/fetchJson";
 
 interface Suggestion {
   symbol: string;
@@ -28,10 +29,10 @@ export default function Navbar() {
     const ctrl = new AbortController();
     const t = setTimeout(async () => {
       try {
-        const r = await fetch(`/api/suggest?q=${encodeURIComponent(q)}`, {
-          signal: ctrl.signal,
-        });
-        const j = await r.json();
+        const j = await fetchJson<{ suggestions?: Suggestion[] }>(
+          `/api/suggest?q=${encodeURIComponent(q)}`,
+          { signal: ctrl.signal },
+        );
         setSugs(j.suggestions || []);
         setOpen(true);
       } catch {

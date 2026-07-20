@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAutoRefresh } from "@/lib/useAutoRefresh";
+import { fetchJson } from "@/lib/fetchJson";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import type { IpoSignalCheck, IpoWithSignal } from "@/lib/mcp";
@@ -43,7 +44,7 @@ export default function IpoDetailPage() {
     if (!slug) return;
     (async () => {
       try {
-        const r = await fetch(`/api/ipo/${encodeURIComponent(slug)}`).then((x) => x.json());
+        const r = await fetchJson<any>(`/api/ipo/${encodeURIComponent(slug)}`);
         if (r.error) throw new Error(r.error);
         setIpo(r);
         setErr(null);

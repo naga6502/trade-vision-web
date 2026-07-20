@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import type { NewsResult } from "@/lib/news";
 import { NewsBody } from "@/components/NewsFeed";
 import { useAutoRefresh } from "@/lib/useAutoRefresh";
+import { fetchJson } from "@/lib/fetchJson";
 
 type Tab = "stock" | "market";
 
@@ -28,8 +29,8 @@ export default function NewsPage() {
         try {
           if (first) setLoading(true);
           const [sr, mr] = await Promise.all([
-            fetch(`/api/news?symbol=${encodeURIComponent(symbol)}&category=stocks&limit=15`).then((r) => r.json()),
-            fetch(`/api/news?category=stocks&limit=20`).then((r) => r.json()),
+            fetchJson<any>(`/api/news?symbol=${encodeURIComponent(symbol)}&category=stocks&limit=15`),
+            fetchJson<any>(`/api/news?category=stocks&limit=20`),
           ]);
           setStock(sr);
           setMarket(mr);

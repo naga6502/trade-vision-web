@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAutoRefresh } from "@/lib/useAutoRefresh";
+import { fetchJson } from "@/lib/fetchJson";
 import {
   BarChart,
   Bar,
@@ -34,8 +35,7 @@ export default function MonteCarloPanel({
   useAutoRefresh(
     () => {
       if (data) return;
-      fetch(`/api/monte-carlo?symbol=${encodeURIComponent(symbol)}`)
-        .then((r) => r.json())
+      fetchJson<any>(`/api/monte-carlo?symbol=${encodeURIComponent(symbol)}`)
         .then((j) => {
           setD(j.error ? null : j);
           setLoading(false);

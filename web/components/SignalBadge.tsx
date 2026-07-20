@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAutoRefresh } from "@/lib/useAutoRefresh";
+import { fetchJson } from "@/lib/fetchJson";
 import type { Fundamentals } from "@/lib/mcp";
 
 interface TvResult {
@@ -73,9 +74,8 @@ export default function SignalBadge({ f }: { f: Fundamentals }) {
 
   useAutoRefresh(
     () => {
-      fetch(`/api/tradingview?symbol=${encodeURIComponent(f.ticker)}`)
-        .then((r) => r.json())
-        .then((j: TvResult) => {
+      fetchJson<TvResult>(`/api/tradingview?symbol=${encodeURIComponent(f.ticker)}`)
+        .then((j) => {
           setTv(j);
           setLoading(false);
         })

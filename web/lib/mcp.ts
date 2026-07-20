@@ -238,9 +238,34 @@ export interface TechnicalSummary {
   neutral: number;
   sell: number;
 }
+
+export type ConfluenceTool = "Pivot" | "Round" | "Fib" | "MA" | "VWAP" | "VolProfile";
+export interface ConfluenceLevel {
+  price: number;
+  low: number;
+  high: number;
+  strength: number;
+  sources: ConfluenceTool[];
+}
+export interface ConfluencePlan {
+  bias: "BUY" | "SELL" | "NEUTRAL";
+  buyZone: ConfluenceLevel | null;
+  sellZone: ConfluenceLevel | null;
+  longStop: number | null;
+  longTarget: number | null;
+  longRRR: number | null;
+  shortStop: number | null;
+  shortTarget: number | null;
+  shortRRR: number | null;
+  levels: ConfluenceLevel[];
+}
+
 export interface Technical {
   symbol: string;
   price: number;
+  triggerPrice: number;
+  triggerDate?: string;
+  confluence: ConfluencePlan;
   summary: TechnicalSummary;
   oscillators: TechSignal[];
   movingAverages: TechSignal[];

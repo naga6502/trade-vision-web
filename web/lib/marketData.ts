@@ -11,7 +11,6 @@
 // remote serves cleanly (quote, company profile + financials, bulk/block deals)
 // are MCP-first.
 
-import { callTool } from "@/lib/mcpClient";
 import { mcp as local } from "@/lib/mcp";
 import { getNews, type NewsResult, type NewsItem } from "@/lib/news";
 import type {
@@ -58,17 +57,63 @@ function num(v: unknown): number | null {
 // Call a remote tool and parse its first text block. Returns null on any
 // failure: transport error, isError, or truncated/unparseable JSON (the 25k
 // cap the remote applies to large payloads).
+// Live market data comes from the hosted Tapetide MCP (49 tools, real-time
+// NSE). The .env.local vars are TAPETIDE_MCP_URL / TAPETIDE_MCP_TOKEN. We call
+// it directly here (mirroring lib/remoteIpo.ts) so the "remote first" strategy
+// in marketData actually reaches live data instead of silently falling back to
+// the local compiled tools.
+const TAPETIDE_URL = process.env.TAPETIDE_MCP_URL;
+const TAPETIDE_TOKEN = process.env.TAPETIDE_MCP_TOKEN;
+
+// Strip a trailing "[TRUNCATED ...]" note the MCP appends when it caps output.
+function stripTruncation(text: string): string {
+  const i = text.indexOf("[TRUNCATED");
+  return i >= 0 ? text.slice(0, i).trim().replace(/,\s*$/, "") : text;
+}
+
+// Parse a JSON-RPC response that may be plain JSON or SSE-framed.
+function parseBody(raw: string): string {
+  const t = raw.trim();
+  if (t.startsWith("event:") || t.startsWith("data:")) {
+    return t
+      .split("\n")
+      .filter((l) => l.startsWith("data:"))
+      .map((l) => l.slice(5).trim())
+      .join("\n");
+  }
+  return t;
+}
+
+// Call a live Tapetide tool and parse its first text block into JSON.
+// Returns null on any failure: no credentials, transport error, isError, or
+// truncated/unparseable payload (the ~25k-char cap the remote applies).
 async function remote(
   name: string,
   args: Record<string, unknown> = {},
 ): Promise<any | null> {
+  if (!TAPETIDE_URL || !TAPETIDE_TOKEN) return null;
   try {
-    const r = await callTool(name, args);
-    if (r.isError) return null;
-    const text = r.content?.[0]?.text;
+    const res = await fetch(TAPETIDE_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json, text/event-stream",
+        Authorization: `Bearer ${TAPETIDE_TOKEN}`,
+      },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "tools/call",
+        params: { name, arguments: args },
+      }),
+      cache: "no-store",
+    });
+    const json = JSON.parse(parseBody(await res.text()));
+    if (json?.error) return null;
+    const text = json?.result?.content?.[0]?.text;
     if (!text) return null;
     try {
-      return JSON.parse(text);
+      return JSON.parse(stripTruncation(text));
     } catch {
       return null; // truncated payload
     }
@@ -78,11 +123,11 @@ async function remote(
 }
 
 // ---------------------------------------------------------------------------
-// quote — MCP-first (get_stock_quote), overlay onto local Yahoo fundamentals.
+// quote — live first (get_live_quote), overlay onto local Yahoo fundamentals.
 // ---------------------------------------------------------------------------
 export async function quote(symbol: string): Promise<Result<Quote>> {
   const localRes = await local.quote(symbol);
-  const q = await remote("get_stock_quote", { symbol });
+  const q = await remote("get_live_quote", { symbol });
   const d = q?.data;
 
   if (localRes.data && d) {
@@ -133,17 +178,18 @@ export async function fundamentals(
   symbol: string,
 ): Promise<Result<Fundamentals>> {
   const localRes = await local.fundamentals(symbol);
-  const [profile, pl, bs, cf] = await Promise.all([
+  const [profile, pl, bs, cf, live] = await Promise.all([
     remote("get_company_profile", { symbol }),
     remote("get_financials", { symbol, section: "profit_loss" }),
     remote("get_financials", { symbol, section: "balance_sheet" }),
     remote("get_financials", { symbol, section: "cash_flow" }),
+    remote("get_live_quote", { symbol }),
   ]);
 
   const prof = profile?.data;
 
   if (!localRes.data) {
-    const built = buildFromRemote(symbol, prof, pl?.data?.[0], bs?.data?.[0], cf?.data?.[0]);
+    const built = buildFromRemote(symbol, prof, pl?.data?.[0], bs?.data?.[0], cf?.data?.[0], live);
     return built ? { data: built } : localRes;
   }
 
@@ -163,9 +209,40 @@ export async function fundamentals(
     if (f.eps != null) base.eps = num(f.eps);
     if (f.dividend_yield != null) base.dividendYield = num(f.dividend_yield);
     if (f.debt_to_equity != null) base.debtToEquity = num(f.debt_to_equity);
+    // Only take remote 52w values when present; otherwise keep the local
+    // Yahoo figure (Tapetide frequently omits high_52w / low_52w as null and
+    // would otherwise blank out the 52W range in the UI).
     if (f.high_52w != null) base.fiftyTwoWeekHigh = num(f.high_52w);
     if (f.low_52w != null) base.fiftyTwoWeekLow = num(f.low_52w);
     if (f.market_cap != null) base.marketCap = num(f.market_cap)! * 1e7;
+  }
+
+  // Overlay the live quote so the header price / change / day range stay in
+  // sync with the live chart. Prefer the remote (Tapetide) get_live_quote when
+  // configured; otherwise fall back to the local Yahoo quote endpoint, which
+  // is fresher than the quoteSummary that fundamentals() is built from and
+  // would otherwise leave the UI showing a stale price. Overwrite the full
+  // price block (not just last price) so the previous close, day high/low,
+  // volume and timestamp all reflect the fresh feed.
+  const liveQuote = live?.data ?? null;
+  if (!liveQuote) {
+    const qRes = await local.quote(symbol).catch(() => null);
+    if (qRes?.data) {
+      const q = qRes.data;
+      base.price = num(q.price) ?? base.price;
+      base.previousClose = num(q.previousClose) ?? base.previousClose;
+      if (q.dayHigh != null) base.dayHigh = num(q.dayHigh);
+      if (q.dayLow != null) base.dayLow = num(q.dayLow);
+      if (q.volume != null) base.volume = num(q.volume);
+      if (q.timestamp) base.timestamp = q.timestamp;
+    }
+  } else {
+    if (liveQuote.price != null) base.price = num(liveQuote.price) ?? base.price;
+    if (liveQuote.prev_close != null) base.previousClose = num(liveQuote.prev_close) ?? base.previousClose;
+    if (liveQuote.high != null) base.dayHigh = num(liveQuote.high);
+    if (liveQuote.low != null) base.dayLow = num(liveQuote.low);
+    if (liveQuote.volume != null) base.volume = num(liveQuote.volume);
+    if (liveQuote.updated_at) base.timestamp = liveQuote.updated_at;
   }
   return { data: base };
 }
@@ -176,6 +253,7 @@ function buildFromRemote(
   pl: any,
   bs: any,
   cf: any,
+  live: any,
 ): Fundamentals | null {
   if (!prof) return null;
   const q = prof.quote || {};
@@ -233,6 +311,18 @@ function buildFromRemote(
     const periods = bs.periods || [];
     const last = periods[periods.length - 1];
     if (last != null) base.totalDebt = num(bs.data["Borrowings"][last]);
+  }
+
+  // Overlay the live quote so the header price is real-time even when the
+  // local fundamentals record had to be built from remote data.
+  const lq = live?.data;
+  if (lq) {
+    if (lq.price != null) base.price = num(lq.price) ?? base.price;
+    if (lq.prev_close != null) base.previousClose = num(lq.prev_close) ?? base.previousClose;
+    if (lq.high != null) base.dayHigh = num(lq.high);
+    if (lq.low != null) base.dayLow = num(lq.low);
+    if (lq.volume != null) base.volume = num(lq.volume);
+    if (lq.updated_at) base.timestamp = lq.updated_at;
   }
 
   return base;
@@ -538,6 +628,44 @@ export async function screener(args: {
   });
 }
 
+// ---------------------------------------------------------------------------
+// priceHistory — live first (get_price_history). Map the UI range to the
+// tool's { days, interval }. Daily bars truncate past ~180d (the remote's
+// ~25k-char cap), so 1Y uses weekly bars to stay live. Falls back to the
+// local compiled history on any failure.
+// ---------------------------------------------------------------------------
+const RANGE_TO_ARGS: Record<string, { days: number; interval: "daily" | "weekly" }> = {
+  "1W": { days: 7, interval: "daily" },
+  "1M": { days: 30, interval: "daily" },
+  "3M": { days: 90, interval: "daily" },
+  "6M": { days: 180, interval: "daily" },
+  "1Y": { days: 365, interval: "weekly" },
+};
+
+export async function priceHistory(
+  symbol: string,
+  range = "3M",
+): Promise<Result<PriceHistory>> {
+  const localRes = await local.priceHistory(symbol, range);
+  const args = RANGE_TO_ARGS[range] ?? RANGE_TO_ARGS["3M"];
+  const q = await remote("get_price_history", { symbol, ...args });
+  const barsRaw: any[] = Array.isArray(q?.data) ? q.data : [];
+  if (barsRaw.length > 0) {
+    const bars: PriceBar[] = barsRaw.map((b) => ({
+      date: String(b.date ?? ""),
+      open: num(b.open) ?? 0,
+      high: num(b.high) ?? 0,
+      low: num(b.low) ?? 0,
+      close: num(b.close) ?? 0,
+      volume: num(b.volume) ?? 0,
+    }));
+    return {
+      data: { symbol, range, bars },
+    };
+  }
+  return localRes;
+}
+
 // Aggregate object so routes can do `import { marketData as mcp }` and call
 // mcp.fundamentals(...), mcp.topGainers(...), etc.
 export const marketData = {
@@ -561,7 +689,7 @@ export const marketData = {
   ipoCalendar,
   ipoDetails,
   screener,
-  priceHistory: (symbol: string, range = "3M") => local.priceHistory(symbol, range),
+  priceHistory,
   optionPressure: (symbol: string, expiry?: string) =>
     local.optionPressure(symbol, expiry),
   ivRadar: (symbol: string, expiry?: string) => local.ivRadar(symbol, expiry),

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import type { Fundamentals, Technical } from "@/lib/mcp";
 import { setLastUpdated } from "@/lib/updatedStore";
 import { useAutoRefresh } from "@/lib/useAutoRefresh";
@@ -15,9 +15,13 @@ import ConsensusPanel from "@/components/ConsensusPanel";
 import SentimentPanel from "@/components/SentimentPanel";
 import AiPredictionPanel from "@/components/AiPredictionPanel";
 import PretradeRiskPanel from "@/components/PretradeRiskPanel";
+import WatchlistPanel from "@/components/WatchlistPanel";
+import PivotLevels from "@/components/PivotLevels";
+import { fetchJson } from "@/lib/fetchJson";
 
 export default function TechnicalPage() {
   const params = useParams();
+  const router = useRouter();
   const symbol = String(params.symbol ?? "RELIANCE").toUpperCase();
 
   const [f, setF] = useState<Fundamentals | null>(null);
@@ -30,8 +34,8 @@ export default function TechnicalPage() {
       (async () => {
         try {
           const [fr, tr] = await Promise.all([
-            fetch(`/api/fundamentals?symbol=${encodeURIComponent(symbol)}`).then((x) => x.json()),
-            fetch(`/api/technical?symbol=${encodeURIComponent(symbol)}`).then((x) => x.json()),
+            fetchJson<Fundamentals & { error?: string }>(`/api/fundamentals?symbol=${encodeURIComponent(symbol)}`),
+            fetchJson<Technical & { error?: string }>(`/api/technical?symbol=${encodeURIComponent(symbol)}`),
           ]);
           setF(fr.error ? null : fr);
           setTech(tr.error ? null : tr);
@@ -64,6 +68,8 @@ export default function TechnicalPage() {
         </Link>
       </div>
 
+      <WatchlistPanel onPick={(s) => router.push(`/stock/${s}/technical`)} />
+
       {loading && (
         <div className="text-center text-muted py-5">
           <span className="spinner-border spinner-border-sm me-2" /> Loading…
@@ -83,6 +89,13 @@ export default function TechnicalPage() {
               <i className="bi bi-graph-up" /> Technical Summary · Oscillators · Moving Averages
             </div>
             <TechnicalAnalysis key={chartSymbol} symbol={chartSymbol} data={tech} />
+          </div>
+
+          <div className="panel mb-3" style={{ padding: 16 }}>
+            <div className="panel-title">
+              <i className="bi bi-diagram-3" /> Pivot Levels · Support / Resistance
+            </div>
+            <PivotLevels symbol={chartSymbol} livePrice={f?.price ?? null} />
           </div>
 
           {f && (

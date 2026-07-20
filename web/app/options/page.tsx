@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useAutoRefresh } from "@/lib/useAutoRefresh";
+import { fetchJson } from "@/lib/fetchJson";
 import type { OptionChain, OptionPressure, IvRadar } from "@/lib/mcp";
 import ScreenerTable, { Col } from "@/components/ScreenerTable";
 import StatCard from "@/components/StatCard";
@@ -24,10 +25,10 @@ export default function OptionsPage() {
   const load = (sym: string, exp: string) => {
     const q = `/api/options?symbol=${encodeURIComponent(sym)}${exp ? `&expiry=${encodeURIComponent(exp)}` : ""}`;
     Promise.all([
-      fetch(q).then((x) => x.json()),
-      fetch(`/api/options?symbol=${encodeURIComponent(sym)}`).then((x) => x.json()),
-      fetch(`/api/options/pressure?symbol=${encodeURIComponent(sym)}${exp ? `&expiry=${encodeURIComponent(exp)}` : ""}`).then((x) => x.json()),
-      fetch(`/api/options/iv?symbol=${encodeURIComponent(sym)}${exp ? `&expiry=${encodeURIComponent(exp)}` : ""}`).then((x) => x.json()),
+      fetchJson<any>(q),
+      fetchJson<any>(`/api/options?symbol=${encodeURIComponent(sym)}`),
+      fetchJson<any>(`/api/options/pressure?symbol=${encodeURIComponent(sym)}${exp ? `&expiry=${encodeURIComponent(exp)}` : ""}`),
+      fetchJson<any>(`/api/options/iv?symbol=${encodeURIComponent(sym)}${exp ? `&expiry=${encodeURIComponent(exp)}` : ""}`),
     ])
       .then(([main, all, pres, ivr]) => {
         if (main.error) throw new Error(main.error);

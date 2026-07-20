@@ -2,6 +2,7 @@
 
 import type { Fundamentals, Technical } from "@/lib/mcp";
 import { fmt, fmtPct, fmtCompact, dir, clsx } from "@/lib/format";
+import { useWatchlist, toggleSignal, type WatchlistEntry, type WatchlistPlan } from "@/lib/watchlist";
 
 // Map the 5-tier machine verdict to a trader-friendly label + colour tier.
 function verdictInfo(label: string): { friendly: string; cls: string } {
@@ -50,6 +51,39 @@ export default function TechnicalHero({
   const sym = (f.ticker ?? "").replace(/\.NS$/, "");
   const name = f.name ?? sym;
 
+  // Watchlist star: snapshot the live verdict + trade plan at save time.
+  const list = useWatchlist();
+  const saved = tech ? list.some((e) => e.symbol === sym) : false;
+  const onToggleWatch = () => {
+    if (!tech) return;
+    const c = tech.confluence;
+    const plan: WatchlistPlan | undefined = c
+      ? {
+          buyZone: c.buyZone
+            ? { low: c.buyZone.low, high: c.buyZone.high, strength: c.buyZone.strength }
+            : undefined,
+          sellZone: c.sellZone
+            ? { low: c.sellZone.low, high: c.sellZone.high, strength: c.sellZone.strength }
+            : undefined,
+          longStop: c.longStop ?? undefined,
+          longTarget: c.longTarget ?? undefined,
+          shortStop: c.shortStop ?? undefined,
+          shortTarget: c.shortTarget ?? undefined,
+        }
+      : undefined;
+    const entry: WatchlistEntry = {
+      symbol: sym,
+      name,
+      label: tech.summary.label,
+      price,
+      triggerPrice: tech.triggerPrice,
+      triggerDate: tech.triggerDate,
+      plan,
+      savedAt: new Date().toISOString(),
+    };
+    toggleSignal(entry);
+  };
+
   const volRatio =
     f.averageVolume && f.averageVolume > 0 ? (f.volume ?? 0) / f.averageVolume : null;
 
@@ -77,6 +111,20 @@ export default function TechnicalHero({
             >
               BSE <i className="bi bi-box-arrow-up-right" />
             </a>
+            {tech && (
+              <button
+                className="pill"
+                style={{ cursor: "pointer", border: saved ? "1px solid #f0b429" : undefined }}
+                title={saved ? "Remove from watchlist" : "Save signal to watchlist"}
+                onClick={onToggleWatch}
+              >
+                <i
+                  className={saved ? "bi bi-star-fill" : "bi bi-star"}
+                  style={{ color: saved ? "#f0b429" : undefined }}
+                />{" "}
+                {saved ? "Saved" : "Watch"}
+              </button>
+            )}
           </div>
           <div className="muted-text mt-1" style={{ fontSize: "0.9rem" }}>
             {name} · National Stock Exchange

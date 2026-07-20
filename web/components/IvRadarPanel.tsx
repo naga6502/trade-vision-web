@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAutoRefresh } from "@/lib/useAutoRefresh";
+import { fetchJson } from "@/lib/fetchJson";
 import {
   LineChart,
   Line,
@@ -52,8 +53,7 @@ export default function IvRadarPanel({
   useAutoRefresh(
     () => {
       if (data) return;
-      fetch(`/api/options/iv?${q.toString()}`)
-        .then((r) => r.json())
+      fetchJson<any>(`/api/options/iv?${q.toString()}`)
         .then((j) => {
           setD(j.error ? null : j);
           setLoading(false);

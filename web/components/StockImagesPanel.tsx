@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAutoRefresh } from "@/lib/useAutoRefresh";
+import { fetchJson } from "@/lib/fetchJson";
 import type { StockImagesResult } from "@/lib/mcp";
 
 const TYPE_ICON: Record<string, string> = {
@@ -23,8 +24,7 @@ export default function StockImagesPanel({
   useAutoRefresh(
     () => {
       if (data) return;
-      fetch(`/api/stock-images?symbol=${encodeURIComponent(symbol)}`)
-        .then((r) => r.json())
+      fetchJson<any>(`/api/stock-images?symbol=${encodeURIComponent(symbol)}`)
         .then((j) => {
           setD(j.error ? null : j);
           setLoading(false);

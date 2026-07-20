@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAutoRefresh } from "@/lib/useAutoRefresh";
+import { fetchJson } from "@/lib/fetchJson";
 import type { PretradeRiskScan } from "@/lib/mcp";
 import { fmt, fmtInt, fmtPct, fmtCompact } from "@/lib/format";
 import QuantDisclaimer from "@/components/QuantDisclaimer";
@@ -60,8 +61,7 @@ export default function PretradeRiskPanel({
   useAutoRefresh(
     () => {
       if (data) return;
-      fetch(`/api/pretrade-risk?${q}`)
-        .then((r) => r.json())
+      fetchJson<any>(`/api/pretrade-risk?${q}`)
         .then((j) => {
           setD(j.error ? null : j);
           setLoading(false);

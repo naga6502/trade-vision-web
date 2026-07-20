@@ -1,4 +1,6 @@
 import { validateSymbol, fetchDailyBars, mean, std, round } from "../quant/util.js";
+/** Minimum completed round-trips before win-rate / trade stats are trusted. */
+export const MIN_RELIABLE_TRADES = 5;
 const TD = 252;
 function smaSeries(arr, period) {
     const out = [];
@@ -154,10 +156,16 @@ function backtest(closes, position) {
                 winRate: NaN,
                 numTrades: 0,
                 finalEquity: NaN,
+                reliable: false,
             },
             trades,
         };
     }
+    // Trust the stats only when there are enough completed round-trips to make
+    // win rate / trade counts meaningful (e.g. a single trade showing "100% win"
+    // is not robust). Buy & hold is excepted: it has real, reportable
+    // performance despite having no round-trips.
+    const reliable = alwaysLong || trades.length >= MIN_RELIABLE_TRADES;
     return {
         metrics: {
             cumulativeReturnPct: round(cumulative * 100, 2),
@@ -168,6 +176,7 @@ function backtest(closes, position) {
             winRate: round(winRate, 3),
             numTrades: trades.length,
             finalEquity: round(finalEquity, 4),
+            reliable,
         },
         trades,
     };

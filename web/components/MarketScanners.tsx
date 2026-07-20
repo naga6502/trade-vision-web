@@ -5,6 +5,7 @@ import { useAutoRefresh } from "@/lib/useAutoRefresh";
 import Link from "next/link";
 import type { NseStock } from "@/lib/mcp";
 import { fmt, fmtPct, clsx } from "@/lib/format";
+import { fetchJson } from "@/lib/fetchJson";
 
 interface ScanRow {
   symbol: string;
@@ -174,8 +175,7 @@ export default function MarketScanners() {
   useAutoRefresh(() => {
     (async () => {
       try {
-        const r = await fetch("/api/screener").then((x) => x.json());
-        if (r.error) throw new Error(r.error);
+        const r = await fetchJson<ScannerData>("/api/screener");
         setData(r);
         setErr(null);
         setLoading(false);

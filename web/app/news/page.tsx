@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useAutoRefresh } from "@/lib/useAutoRefresh";
+import { fetchJson } from "@/lib/fetchJson";
 import { useSyncExternalStore } from "react";
 import { NewsBody } from "@/components/NewsFeed";
 import { formatPublished } from "@/lib/format";
@@ -41,11 +42,11 @@ export default function MarketNewsPage() {
       (async () => {
         try {
           const [mr, sr, ar] = await Promise.all([
-            fetch(`/api/news?category=stocks&limit=25`).then((r) => r.json()),
-            fetch(
+            fetchJson<any>(`/api/news?category=stocks&limit=25`),
+            fetchJson<any>(
               `/api/news?symbol=${encodeURIComponent(stockSym)}&category=stocks&limit=15`,
-            ).then((r) => r.json()),
-            fetch(`/api/announcements?limit=12`).then((r) => r.json()),
+            ),
+            fetchJson<any>(`/api/announcements?limit=12`),
           ]);
           setMarket(mr);
           setStock(sr);

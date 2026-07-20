@@ -9,7 +9,16 @@ export interface EquityMetrics {
     winRate: number;
     numTrades: number;
     finalEquity: number;
+    /**
+     * Whether the metric set is statistically meaningful. false when there are
+     * too few completed round-trips for win rate / trade stats to be trusted
+     * (the strategy signalled but barely traded). Always true for always-long
+     * strategies like buy & hold, which have real reportable performance.
+     */
+    reliable: boolean;
 }
+/** Minimum completed round-trips before win-rate / trade stats are trusted. */
+export declare const MIN_RELIABLE_TRADES = 5;
 export interface EquityCurvesResult {
     symbol: string;
     bars: number;

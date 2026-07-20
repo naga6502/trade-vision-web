@@ -7,6 +7,7 @@ import {
   subscribeUpdated,
 } from "@/lib/updatedStore";
 import { setSelectedSymbol } from "@/lib/selectedStore";
+import { fetchJson } from "@/lib/fetchJson";
 
 interface Suggestion {
   symbol: string;
@@ -37,10 +38,10 @@ export default function Topbar() {
     const ctrl = new AbortController();
     const t = setTimeout(async () => {
       try {
-        const r = await fetch(`/api/suggest?q=${encodeURIComponent(q)}`, {
-          signal: ctrl.signal,
-        });
-        const j = await r.json();
+        const j = await fetchJson<{ suggestions?: Suggestion[] }>(
+          `/api/suggest?q=${encodeURIComponent(q)}`,
+          { signal: ctrl.signal },
+        );
         setSugs(j.suggestions || []);
         setOpen(true);
       } catch {
@@ -84,6 +85,10 @@ export default function Topbar() {
     setSelectedSymbol(s);
     setOpen(false);
     setQ("");
+    // On the Analytics & Quant Lab page the top search bar isn't a separate
+    // control — it drives the page directly via the selected-symbol store, so
+    // we stay on /analytics instead of navigating to a stock tab.
+    if (pathname.startsWith("/analytics")) return;
     router.push(`/stock/${s}/${tabFromPath(pathname)}`);
   }
 

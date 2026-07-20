@@ -16,6 +16,7 @@ import ShareholdingPattern, {
 } from "@/components/ShareholdingPattern";
 import { fmt, fmtPct, dir, clsx } from "@/lib/format";
 import { useAutoRefresh } from "@/lib/useAutoRefresh";
+import { fetchJson } from "@/lib/fetchJson";
 
 export default function FinancialsPage() {
   const params = useParams();
@@ -33,7 +34,7 @@ export default function FinancialsPage() {
       (async () => {
         try {
           if (first) setLoading(true);
-          const r = await fetch(`/api/fundamentals?symbol=${encodeURIComponent(symbol)}`).then((x) => x.json());
+          const r = await fetchJson<any>(`/api/fundamentals?symbol=${encodeURIComponent(symbol)}`);
           if (r.error) throw new Error(r.error);
           setF(r);
           setLoading(false);

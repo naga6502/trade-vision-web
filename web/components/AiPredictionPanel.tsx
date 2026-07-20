@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAutoRefresh } from "@/lib/useAutoRefresh";
+import { fetchJson } from "@/lib/fetchJson";
 import type { AiPrediction, ModelVote } from "@/lib/mcp";
 import QuantDisclaimer from "@/components/QuantDisclaimer";
 
@@ -34,8 +35,7 @@ export default function AiPredictionPanel({
   useAutoRefresh(
     () => {
       if (data) return;
-      fetch(`/api/ai-prediction?symbol=${encodeURIComponent(symbol)}`)
-        .then((r) => r.json())
+      fetchJson<any>(`/api/ai-prediction?symbol=${encodeURIComponent(symbol)}`)
         .then((j) => {
           setD(j.error ? null : j);
           setLoading(false);

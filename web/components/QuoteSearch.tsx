@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Quote } from "@/lib/mcp";
+import { fetchJson } from "@/lib/fetchJson";
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
@@ -70,10 +71,11 @@ export default function QuoteSearch() {
     setError(null);
     setQuote(null);
     try {
-      const r = await fetch(`/api/quote?symbol=${encodeURIComponent(s)}`);
-      const j = await r.json();
-      if (!r.ok) throw new Error(j.error || "Failed to fetch quote");
-      setQuote(j as Quote);
+      const j = await fetchJson<Quote & { error?: string }>(
+        `/api/quote?symbol=${encodeURIComponent(s)}`,
+      );
+      if (j.error) throw new Error(j.error);
+      setQuote(j);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {

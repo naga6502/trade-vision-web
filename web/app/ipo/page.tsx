@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAutoRefresh } from "@/lib/useAutoRefresh";
+import { fetchJson } from "@/lib/fetchJson";
 import Link from "next/link";
 import type { IpoSignal, IpoWithSignal } from "@/lib/mcp";
 import ScreenerTable, { Col } from "@/components/ScreenerTable";
@@ -63,7 +64,7 @@ export default function IpoPage() {
   useAutoRefresh(() => {
     (async () => {
       try {
-        const r = await fetch(`/api/ipo?status=${status}`).then((x) => x.json());
+        const r = await fetchJson<any>(`/api/ipo?status=${status}`);
         if (r.error) throw new Error(r.error);
         setIpos(r.ipos ?? []);
         setErr(null);

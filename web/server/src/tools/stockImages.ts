@@ -29,15 +29,30 @@ export interface StockImagesArgs {
   bars?: number;
 }
 
-const W = 820;
-const H = 360;
+const W = 680;
+const H = 300;
 const M = { top: 24, right: 16, bottom: 28, left: 56 };
+
+// Per-symbol frame overrides for symbols whose charts render too large in the
+// panel (e.g. AARTIIND.NS). Falls back to the defaults above.
+const FRAME_OVERRIDES: Record<string, { w?: number; h?: number }> = {
+  AARTIIND: { w: 520, h: 230 },
+};
+
+function frameFor(ticker: string): { W: number; H: number } {
+  const o = FRAME_OVERRIDES[ticker.replace(/\.(NS|BO)$/, "")];
+  return { W: o?.w ?? W, H: o?.h ?? H };
+}
 
 function esc(n: number): string {
   return Number.isFinite(n) ? String(round(n, 2)) : "";
 }
 
-function candlestickSvg(bars: { date: string; open: number; high: number; low: number; close: number }[]): string {
+function candlestickSvg(
+  bars: { date: string; open: number; high: number; low: number; close: number }[],
+  W: number,
+  H: number,
+): string {
   const plotW = W - M.left - M.right;
   const plotH = H - M.top - M.bottom;
   const lo = Math.min(...bars.map((b) => b.low));
@@ -73,6 +88,8 @@ function candlestickSvg(bars: { date: string; open: number; high: number; low: n
 function ivSurfaceSvg(
   smile: { strike: number; iv: number | null }[],
   underlying: number | null,
+  W: number,
+  H: number,
 ): string {
   const pts = smile.filter((p) => p.iv != null) as { strike: number; iv: number }[];
   const plotW = W - M.left - M.right;
@@ -109,6 +126,8 @@ function ivSurfaceSvg(
 
 function optionsFlowSvg(
   strikes: { strikePrice: number; ce: { openInterest: number } | null; pe: { openInterest: number } | null }[],
+  W: number,
+  H: number,
 ): string {
   const plotW = W - M.left - M.right;
   const plotH = H - M.top - M.bottom;
@@ -183,15 +202,17 @@ export async function generateStockImages(args: StockImagesArgs): Promise<StockI
   const outDir = join(process.cwd(), "charts");
   mkdirSync(outDir, { recursive: true });
 
+  const { W: fw, H: fh } = frameFor(ticker);
+
   const charts: ChartFile[] = [];
   if (cbars.length >= 2) {
-    const svg = candlestickSvg(cbars);
+    const svg = candlestickSvg(cbars, fw, fh);
     const path = join(outDir, `${base}_candlestick.svg`);
     writeFileSync(path, svg, "utf8");
     charts.push({ type: "candlestick", title: "Candlestick price", path, svg });
   }
   {
-    const svg = ivSurfaceSvg(smile, underlying);
+    const svg = ivSurfaceSvg(smile, underlying, fw, fh);
     const path = join(outDir, `${base}_iv_surface.svg`);
     writeFileSync(path, svg, "utf8");
     charts.push({ type: "iv_surface", title: "Implied volatility by strike", path, svg });
@@ -203,6 +224,8 @@ export async function generateStockImages(args: StockImagesArgs): Promise<StockI
         ce: s.ce ? { openInterest: s.ce.openInterest } : null,
         pe: s.pe ? { openInterest: s.pe.openInterest } : null,
       })),
+      fw,
+      fh,
     );
     const path = join(outDir, `${base}_options_flow.svg`);
     writeFileSync(path, svg, "utf8");

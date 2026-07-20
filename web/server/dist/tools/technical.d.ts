@@ -14,6 +14,12 @@ export interface TechnicalSummary {
 export interface Technical {
     symbol: string;
     price: number;
+    /** Price at which the current BUY/SELL/NEUTRAL verdict first triggered. */
+    triggerPrice: number;
+    /** ISO date (YYYY-MM-DD) of the bar where the verdict triggered, if known. */
+    triggerDate?: string;
+    /** Confluence-based trade plan: where to buy/sell, stop and target. */
+    confluence: ConfluencePlan;
     summary: TechnicalSummary;
     oscillators: TechSignal[];
     movingAverages: TechSignal[];
@@ -78,5 +84,30 @@ export interface RawBar {
 }
 export declare function fetchBars(ticker: string, interval: string, days: number): Promise<RawBar[]>;
 export declare function getPatternAnalysis(args: TechnicalArgs): Promise<PatternAnalysis>;
+export type ConfluenceTool = "Pivot" | "Round" | "Fib" | "MA" | "VWAP" | "VolProfile";
+export interface ConfluenceLevel {
+    /** Cluster centre (average of the agreeing candidate prices). */
+    price: number;
+    low: number;
+    high: number;
+    /** Number of independent tools that agree on this price (1..6). */
+    strength: number;
+    sources: ConfluenceTool[];
+}
+export interface ConfluencePlan {
+    bias: "BUY" | "SELL" | "NEUTRAL";
+    buyZone: ConfluenceLevel | null;
+    sellZone: ConfluenceLevel | null;
+    longStop: number | null;
+    longTarget: number | null;
+    /** Reward:risk ratio for the long setup (target vs stop from entry). */
+    longRRR: number | null;
+    shortStop: number | null;
+    shortTarget: number | null;
+    shortRRR: number | null;
+    /** Top confluence clusters, strongest first, for display. */
+    levels: ConfluenceLevel[];
+}
+export declare function computeConfluence(closes: number[], highs: number[], lows: number[], vols: number[], price: number, atr: number, bias: ConfluencePlan["bias"]): ConfluencePlan;
 export declare function getTechnicalAnalysis(args: TechnicalArgs): Promise<Technical>;
 export {};

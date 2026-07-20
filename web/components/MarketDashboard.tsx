@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAutoRefresh } from "@/lib/useAutoRefresh";
+import { fetchJson } from "@/lib/fetchJson";
 import type {
   NseIndex,
   MarketStatusItem,
@@ -39,11 +40,11 @@ export default function MarketDashboard() {
       (async () => {
         try {
           const [ir, mr, gr, sr, dr] = await Promise.all([
-            fetch(`/api/nifty-indices`).then((r) => r.json()),
-            fetch(`/api/nifty-movers?limit=8`).then((r) => r.json()),
-            fetch(`/api/global-markets`).then((r) => r.json()),
-            fetch(`/api/market-status`).then((r) => r.json()),
-            fetch(`/api/fii-dii`).then((r) => r.json()),
+            fetchJson<any>(`/api/nifty-indices`),
+            fetchJson<any>(`/api/nifty-movers?limit=8`),
+            fetchJson<any>(`/api/global-markets`),
+            fetchJson<any>(`/api/market-status`),
+            fetchJson<any>(`/api/fii-dii`),
           ]);
           setIndices(Array.isArray(ir) ? ir : []);
           setMovers(mr && !mr.error ? mr : EMPTY_MOVERS);

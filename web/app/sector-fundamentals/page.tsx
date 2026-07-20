@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAutoRefresh } from "@/lib/useAutoRefresh";
+import { fetchJson } from "@/lib/fetchJson";
 import type { SectorTag } from "@/lib/sectors";
 import ScreenerTable, { Col, SymCell } from "@/components/ScreenerTable";
 import { fmt, fmtCompact, fmtPct, clsx } from "@/lib/format";
@@ -62,7 +63,7 @@ export default function SectorFundamentalsPage() {
   useAutoRefresh(() => {
     (async () => {
       try {
-        const r = await fetch("/api/sector-fundamentals").then((x) => x.json());
+        const r = await fetchJson<any>("/api/sector-fundamentals");
         if (r.error) throw new Error(r.error);
         setData(r);
         setErr(null);

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAutoRefresh } from "@/lib/useAutoRefresh";
+import { fetchJson } from "@/lib/fetchJson";
 import type { OptionPressure } from "@/lib/mcp";
 import { fmt, fmtPct, fmtInt } from "@/lib/format";
 
@@ -26,8 +27,7 @@ export default function OptionPressurePanel({
   useAutoRefresh(
     () => {
       if (data) return;
-      fetch(`/api/options/pressure?${q.toString()}`)
-        .then((r) => r.json())
+      fetchJson<any>(`/api/options/pressure?${q.toString()}`)
         .then((j) => {
           setD(j.error ? null : j);
           setLoading(false);

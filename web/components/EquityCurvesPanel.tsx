@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAutoRefresh } from "@/lib/useAutoRefresh";
+import { fetchJson } from "@/lib/fetchJson";
 import {
   BarChart,
   Bar,
@@ -21,8 +22,8 @@ const AXIS = "#8b93a7";
 const UP = "#16c784";
 const DOWN = "#ea3943";
 
-function metric(v: number, kind: "pct" | "num" | "ratio"): string {
-  if (Number.isNaN(v)) return "n/a";
+function metric(v: number | null, kind: "pct" | "num" | "ratio"): string {
+  if (v == null || Number.isNaN(v)) return "n/a";
   if (kind === "pct") return fmtPct(v, false);
   if (kind === "ratio") return v.toFixed(2);
   return fmt(v, 2);
@@ -46,8 +47,7 @@ export default function EquityCurvesPanel({
   useAutoRefresh(
     () => {
       if (data) return;
-      fetch(`/api/equity-curves?${q.toString()}`)
-        .then((r) => r.json())
+      fetchJson<any>(`/api/equity-curves?${q.toString()}`)
         .then((j) => {
           setD(j.error ? null : j);
           setLoading(false);
@@ -84,7 +84,10 @@ export default function EquityCurvesPanel({
 
   const chart = (d.strategies ?? []).map((s) => ({
     name: s.strategy,
-    ret: Number(s.cumulativeReturnPct.toFixed(1)),
+    ret:
+      s.cumulativeReturnPct == null || Number.isNaN(s.cumulativeReturnPct)
+        ? 0
+        : Number(s.cumulativeReturnPct.toFixed(1)),
   }));
 
   const cols: { key: keyof EquityMetrics; label: string; kind: "pct" | "num" | "ratio" }[] = [
@@ -122,13 +125,23 @@ export default function EquityCurvesPanel({
           <tbody>
             {d.strategies.map((s) => {
               const noTrades = s.numTrades === 0;
+              const unreliable = s.reliable === false;
               return (
-              <tr key={s.strategy}>
+              <tr key={s.strategy} style={unreliable ? { opacity: 0.62 } : undefined}>
                 <td className="fw-semibold">
                   {s.strategy}
                   {noTrades && (
                     <div className="muted-text" style={{ fontSize: "0.62rem", fontWeight: 400 }}>
                       no trades
+                    </div>
+                  )}
+                  {unreliable && !noTrades && (
+                    <div
+                      className="muted-text"
+                      style={{ fontSize: "0.62rem", fontWeight: 400 }}
+                      title="Too few completed trades for these stats to be statistically meaningful"
+                    >
+                      low sample (n={s.numTrades})
                     </div>
                   )}
                 </td>
@@ -138,7 +151,7 @@ export default function EquityCurvesPanel({
                     className="text-end mono"
                     style={{
                       color:
-                        noTrades || Number.isNaN(s[c.key] as number)
+                        noTrades || s[c.key] == null || Number.isNaN(s[c.key] as number)
                           ? undefined
                           : c.kind === "pct" && c.key !== "maxDrawdownPct"
                           ? (s[c.key] as number) >= 0
